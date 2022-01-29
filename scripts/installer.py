@@ -11,6 +11,7 @@ SOFTWARE_INFO = {
   'BCFTools': {'ver':'1.14' },
   'Picard': {'ver':'2.26.9' },
   'GATK': {'ver':'4.2.4.0' },
+  'GDV' : {'ver':'1.3.0'},
   'Bowtie2': {'ver':'2.4.4' },
   'STAR': {'ver':'2.7.9a' },
   'Cuff': {'ver':'2.2.1' },
@@ -38,6 +39,7 @@ def installSRA():
   os.environ['PATH'] += ':' + common.APPS_DIR + '/sra'
   proc = subprocess.run('cp ./sratoolkit*/bin/* '+common.APPS_DIR+'/sra', shell=True)
   proc = subprocess.run('rm -r ./sratoolkit*', shell=True)
+  proc = subprocess.run('vdb-config --interactive', shell=True)
   proc = subprocess.run('test-sra | grep "NCBI SRA Toolkit release version:" | head -n 1', shell=True, stdout=PIPE, stderr=PIPE, text=True)
   print('Completed.')
   os.chdir(common.WORK_SPACE)

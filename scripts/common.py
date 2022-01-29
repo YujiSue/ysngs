@@ -1,6 +1,4 @@
 import os
-import subprocess
-from subprocess import PIPE
 
 WORK_SPACE = os.environ.get("HOME")
 APPS_DIR = WORK_SPACE+'/MyApp'
@@ -70,11 +68,6 @@ def makeDirs():
 def addPath(path):
   if not(path in os.environ['PATH'].split(':')):
     os.environ['PATH'] += ':'+path
-
-def execCmd(cmd):
-  print('Run: >', cmd)
-  #subprocess.Popen(cmd, shell=True)
-  return
 
 def errCheck(result):
   if result[0]:
