@@ -18,7 +18,7 @@ class config :
       'MEME':{'ver':'5.4.1' }
     }
     self.WORK_SPACE = os.environ.get("HOME")
-    self.setDefault(self)
+    self.setDefault()
 
   def setWorkSpace(self, path):
     self.WORK_SPACE = path
