@@ -1,6 +1,7 @@
 import os
 import subprocess
 from subprocess import PIPE
+import common
 
 class installer :
   def __init__(self, config):
@@ -26,7 +27,7 @@ class installer :
       print('  Binary files expansion failed.')
       return
     os.makedirs(self.cfg.APPS_DIR + '/sra',exist_ok=True)
-    os.environ['PATH'] += ':' + self.cfg.APPS_DIR + '/sra'
+    common.addPath(self.cfg.APPS_DIR + '/sra')
     proc = subprocess.run('cp ./sratoolkit*/bin/* '+self.cfg.APPS_DIR+'/sra', shell=True)
     proc = subprocess.run('rm -r ./sratoolkit*', shell=True)
     proc = subprocess.run('vdb-config --interactive', shell=True)
@@ -74,9 +75,10 @@ class installer :
     else:
       print('  Compile failed.')
       return
-    proc = subprocess.run('rm -r '+self.cfg.  TEMPORAL+'/bwa*', shell=True)
+    proc = subprocess.run('rm -r '+self.cfg.  self.cfg.TEMPORAL+'/bwa*', shell=True)
     os.chdir(self.cfg.WORK_SPACE)
     print('Installed.')
+    common.addPath(self.cfg.APPS_DIR)
     proc = subprocess.run('bwa', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     lines = proc.stderr.splitlines()
     for line in lines:
@@ -160,7 +162,6 @@ class installer :
     print('  cmake buid.') 
     proc = subprocess.run('make -j8 install', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('  Compile completed.') 
-    os.environ['PATH'] += ':'+self.cfg.APPS_DIR+'/TVC/bin'
     proc = subprocess.run('cp '+build+'/tvc-' + self.cfg.SOFTWARE_INFO['TVC']['ver']+'/share/TVC/examples/example1/reference* '+self.cfg.REFERENCE_DIR, shell=True)
     proc = subprocess.run('cp '+build+'/tvc-' + self.cfg.SOFTWARE_INFO['TVC']['ver']+'/share/TVC/examples/example1/test* '+self.cfg.TEST_DIR, shell=True)
     proc = subprocess.run('cp '+build+'/tvc-' + self.cfg.SOFTWARE_INFO['TVC']['ver']+'/share/TVC/pluginMedia/configs/* '+self.cfg.PREFERENCE_DIR, shell=True)
@@ -169,6 +170,7 @@ class installer :
     proc = subprocess.run('rm -r '+build, shell=True)
     proc = subprocess.run('rm '+self.cfg.TEMPORAL+'/tvc*', shell=True)
     os.chdir(self.cfg.WORK_SPACE)
+    common.addPath(self.cfg.APPS_DIR+'/TVC/bin')
     proc = subprocess.run('tvc --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('Installed.')
     print('> ', proc.stdout.splitlines()[0])
@@ -268,12 +270,12 @@ class installer :
       print('  Failed.')
       return
     os.chdir(self.cfg.WORK_SPACE)
-    proc = subprocess.run('java -jar '+self.cfg.APPS_DIR+'/picard.jar MarkDuplicates --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
+    proc = subprocess.run('java -jar ' + self.cfg.APPS_DIR + '/picard.jar MarkDuplicates --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('Completed.')
     print('> ', proc.stderr)
 
   def checkGATK(self):
-    return os.path.exists(self.cfg.APPS_DIR+'/gatk')
+    return os.path.exists(self.cfg.APPS_DIR + '/gatk')
 
   def installGATK(self):
     print('Install GATK ...')
@@ -291,10 +293,10 @@ class installer :
       print('  Failed to expand sources')
       return
     os.makedirs(self.cfg.APPS_DIR+'/gatk',exist_ok=True)
-    os.environ['PATH'] += ':'+self.cfg.APPS_DIR+'/gatk'
     proc = subprocess.run('mv ./gatk-' + self.cfg.SOFTWARE_INFO['GATK']['ver']+'/* '+self.cfg.APPS_DIR+'/gatk', shell=True)
     proc = subprocess.run('rm -r '+self.cfg.TEMPORAL+'/gatk*', shell=True)
     os.chdir(self.cfg.WORK_SPACE)
+    common.addPath(self.cfg.APPS_DIR+'/gatk')
     proc = subprocess.run('gatk --list', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('Completed.')
     print('> ', proc.stderr.splitlines()[0])

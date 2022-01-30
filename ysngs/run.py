@@ -1,6 +1,7 @@
 import os
 import subprocess
 from subprocess import PIPE 
+import common
 
 class apprun:
   def __init__(self, config):
@@ -34,7 +35,7 @@ class apprun:
              option={'thread':8, 'checksr':True, 'refpath':None, 'addRG':False, 'rgroup':''}):
     if not os.path.exists(input):
       return (1, 'No input.')
-    self.cfg.addPath(self.cfg.APPS_DIR)
+    common.addPath(self.cfg.APPS_DIR)
     if not (len(ref) and self.hasBWARefIndex(ref)):
       res = self.makeBWARefIndex(option['refpath'], ref)
       if res[0]:
@@ -44,6 +45,8 @@ class apprun:
       cmd += '-t '+str(option['thread'])
     if 'checksr' in option:
       cmd += ' -M'
+    if 'addRG' in option and option['addRG']:
+      cmd += ' -R "@RG\\t' + option['rgroup'] + '"'
     cmd += ' '+ref
     if os.path.exists(input[0]):
       cmd += ' ' + input[0]
@@ -114,7 +117,7 @@ class apprun:
       return (1, 'File not found.')
     cmd = 'samtools sort -l1 -T tmp' + \
       ' -@ '+str(option['thread']) + ' -m '+option['ram'] + \
-      ' -O bam -o '+output+'.bam'
+      ' -O bam -o '+output + ' ' + input
     return self.execCmd(cmd)
 
   def runSamtoolIndex(self, input=''):
@@ -126,7 +129,8 @@ class apprun:
   def runPicardMD(self, input='', output='', metric = ''):
     if not os.path.exists(input):
       return (1, 'File not found.')
-    cmd = 'Picard MarkDuplicates'
+    common.addPath(common.APPS_DIR)
+    cmd = 'java -jar '+os.path.join(common.APPS_DIR,'picard.jar')+' MarkDuplicates'
     cmd += ' -I ' + input
     cmd += ' -O ' + output
     cmd += ' -M ' + metric
@@ -138,7 +142,7 @@ class apprun:
       return (1, 'File not found.')
     if not os.path.exists(ref):
       return (1, 'Reference not found.')
-    self.cfg.addPath(self.cfg.APPS_DIR+'/TSVC/bin')
+    common.addPath(os.path.join(common.APPS_DIR,'TVC', 'bin'))
     cmd = 'python2 '+self.cfg.APPS_DIR+'/TSVC/bin/variant_caller_pipeline.py' + \
       ' --input-bam '+input + \
       ' --reference-fasta ' + ref + \
@@ -155,17 +159,29 @@ class apprun:
       return (1, 'Reference not found.')
     cmd = 'bcftools mpileup -Ou' + \
       ' -f ' + ref + ' ' + input + \
-      ' | bcftools call -vm -O z - o ' + output + '.gz'
+       ' | bcftools call -vm -Oz -o ' + output + '.gz'
     return self.execCmd(cmd)
 
-  def runGATKBRecal(self, input = '', output = '', ref = '', \
+  def makeGATKRefDict(self, ref = ''):
+    path, ext = os.path.splitext(ref)
+    if os.path.exists(path+'.dict'):
+      print('  Reference dict. exist.')
+      return
+    else:
+      print('  Reference dict. does not exist.')
+      cmd = 'gatk CreateSequenceDictionary -R '+ref
+      return self.execCmd(cmd)
+
+  def runGATKBRecal(self, input = '', output = '', ref = '', known = '',  \
                     option={'ram':'8g'}):
+    common.addPath(os.path.join(common.APPS_DIR,'gatk'))
     gatkcmd = 'gatk'
     if option['ram']:
       gatkcmd += ' --java-options "-Xmx'+option['ram']+'"'
     cmd = gatkcmd + ' BaseRecalibrator'
     cmd += ' -R ' + ref
     cmd += ' -I ' + input
+    cmd += ' --known-sites ' + known
     cmd += ' -O ' + output+'_brecal.table'
 #-L $i-scattered.interval_list
 #$knownSiteArg -O $out
@@ -187,9 +203,11 @@ class apprun:
       return (1, 'File not found.')
     if not os.path.exists(ref):
       return (1, 'Reference not found.')
+    common.addPath(os.path.join(common.APPS_DIR,'gatk'))
     cmd = 'gatk'
     if option['ram']:
       cmd += ' --java-options "-Xmx'+option['ram']+'"'
+    cmd += ' HaplotypeCaller'
     cmd += ' -R ' + self.cfg.REFERENCE_DIR + '/' + ref + \
       ' -I ' + input + \
       ' -O ' + output + '.g.vcf.gz -ERC GVCF'

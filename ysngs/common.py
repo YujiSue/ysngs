@@ -1,5 +1,9 @@
 import os
 
+def addPath(path):
+  if not(path in os.environ['PATH'].split(':')):
+    os.environ['PATH'] += ':'+path
+
 class config :
   def __init__(self):
     self.SOFTWARE_INFO = {
