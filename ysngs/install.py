@@ -75,7 +75,7 @@ class installer :
     else:
       print('  Compile failed.')
       return
-    proc = subprocess.run('rm -r '+self.cfg.  self.cfg.TEMPORAL+'/bwa*', shell=True)
+    proc = subprocess.run('rm -r '+self.cfg.TEMPORAL+'/bwa*', shell=True)
     os.chdir(self.cfg.WORK_SPACE)
     print('Installed.')
     common.addPath(self.cfg.APPS_DIR)
