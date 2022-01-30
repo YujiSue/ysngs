@@ -1,7 +1,7 @@
 import os
 import subprocess
 from subprocess import PIPE 
-import common
+import ysngs.common as common
 
 class apprun:
   def __init__(self, config):
