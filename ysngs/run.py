@@ -51,7 +51,7 @@ class apprun:
     if not self.hasBWARefIndex(ref):
       res = self.makeBWARefIndex(option['refpath'], ref)
       if not res:
-        print('Reference index construction error.')
+        print(' Reference index construction error.')
         return
     cmd = 'bwa mem '
     if 'thread' in option:
@@ -77,11 +77,12 @@ class apprun:
   
   def runBowtie2(self, seqtype='single', input=[], ref='', output='', \
                  option={'thread':8, 'checksr':True, 'refpath':None}):
-    self.cfg.addPath(self.cfg.APPS_DIR+'')
+    common.addPath(self.cfg.APPS_DIR+'')
     if not (len(ref) and self.hasBowtRefIndex(ref)):
       res = self.makeBowtRefIndex(option['refpath'], ref)
-      if res[0]:
-        return res
+      if not res:
+        print(' Reference index construction error.')
+        return
     cmd = 'bowtie2'
     if seqtype == 'single' and os.path.exists(input[0]):
       cmd += ' -U '+input[0]
@@ -126,8 +127,8 @@ class apprun:
     return self.execCmd(cmd)
 
   def runPicardMD(self, input='', output='', metric = ''):
-    common.addPath(common.APPS_DIR)
-    cmd = 'java -jar '+os.path.join(common.APPS_DIR,'picard.jar') + ' MarkDuplicates'
+    common.addPath(self.cfg.APPS_DIR)
+    cmd = 'java -jar '+os.path.join(self.cfg.APPS_DIR,'picard.jar') + ' MarkDuplicates'
     cmd += ' -I ' + input
     cmd += ' -O ' + output
     cmd += ' -M ' + metric
@@ -135,7 +136,7 @@ class apprun:
 
   def runTVC(self, input = '', outdir = '', ref = '', 
              option = { 'param' : '', 'motif' : ''}):
-    common.addPath(os.path.join(common.APPS_DIR,'TVC', 'bin'))
+    common.addPath(os.path.join(self.cfg.APPS_DIR,'TVC', 'bin'))
     cmd = 'python2 '+self.cfg.APPS_DIR+'/TSVC/bin/variant_caller_pipeline.py' + \
       ' --input-bam '+input + \
       ' --reference-fasta ' + ref + \
@@ -156,7 +157,7 @@ class apprun:
 
   def runGATKBRecal(self, input = '', output = '', ref = '', known = '',  \
                     option={'ram':'8g'}):
-    common.addPath(os.path.join(common.APPS_DIR,'gatk'))
+    common.addPath(os.path.join(self.cfg.APPS_DIR,'gatk'))
     gatkcmd = 'gatk'
     if option['ram']:
       gatkcmd += ' --java-options "-Xmx'+option['ram']+'"'
