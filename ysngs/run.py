@@ -6,15 +6,20 @@ import ysngs.common as common
 class apprun:
   def __init__(self, config):
     self.cfg = config
+  
+  def printMsgLine(self, msg = ''):
+    lines = msg.splitlines()
+    for l in lines:
+      print(' ', l)
 
   def execCmd(self, cmd):
-    print('  Run: >', cmd)
+    print('Run: >', cmd)
     proc = subprocess.run(cmd, stdout=PIPE, stderr=PIPE, text=True, shell=True)
     if proc.returncode:
-      print(proc.stderr)
+      self.printMsgLine(proc.stderr)
       return False
     else:
-      print(proc.stdout)
+      self.printMsgLine(proc.stdout)
       return True
     
   def downloadSRA(self, srid, output = '.', option = {'thread':8}):
@@ -32,8 +37,6 @@ class apprun:
     return os.path.exists(base+'.pac')
 
   def makeBWARefIndex(self, refpath, name):
-    if not os.path.exists(refpath):
-      return (1, 'No reference.')
     cmd = 'bwa index -p ' + os.path.join(self.cfg.REFERENCE_DIR, name) + ' ' + refpath
     return self.execCmd(cmd)
   
@@ -46,6 +49,9 @@ class apprun:
     common.addPath(self.cfg.APPS_DIR)
     if not self.hasBWARefIndex(ref):
       res = self.makeBWARefIndex(option['refpath'], ref)
+      if not res:
+        print('Reference index construction error.')
+        return
     cmd = 'bwa mem '
     if 'thread' in option:
       cmd += '-t '+str(option['thread'])
@@ -54,28 +60,22 @@ class apprun:
     if 'addRG' in option and option['addRG']:
       cmd += ' -R "@RG\\t' + option['rgroup'] + '"'
     cmd += ' '+ref
-    if os.path.exists(input[0]):
-      cmd += ' ' + input[0]
-    else:
-      return (1, 'File not found. "'+input[0]+'"')
+    cmd += ' ' + input[0]
     if len(input) == 2 and os.path.exists(input[1]) and seqtype == 'paired':
       cmd += ' ' + input[1]
     cmd += ' > ' + output
+    os.chdir(self.cfg.REFERENCE_DIR)
     return self.execCmd(cmd)
 
   def hasBowtRefIndex(self, ref):
     return os.path.exists(self.cfg.REFERENCE_DIR+'/'+ref+'.bt2')
 
   def makeBowtRefIndex(self, refpath, ref):
-    if not os.path.exists(refpath):
-      return (1, 'No reference.')
     cmd = 'bowtie2-build -f ' + refpath + ' ' + ref
     return self.execCmd(cmd)
   
   def runBowtie2(self, seqtype='single', input=[], ref='', output='', \
                  option={'thread':8, 'checksr':True, 'refpath':None}):
-    if len(input) == 0:
-      return (1, 'No input.')
     self.cfg.addPath(self.cfg.APPS_DIR+'')
     if not (len(ref) and self.hasBowtRefIndex(ref)):
       res = self.makeBowtRefIndex(option['refpath'], ref)
@@ -103,40 +103,30 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSamtool2Fq(self, input='', output=''):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
     cmd = 'samtools fastq -b'
     return self.execCmd(cmd)
 
   def runSamtool2BAM(self, input='',output='',option={}):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
     cmd = 'samtools view'
     if 'thread' in option:
       cmd += ' -@ '+str(option['thread'])
-    cmd += ' -b -o '+ os.path.join(self.cfg.OUT_DIR, output)+'.bam ' + input
+    cmd += ' -b -o '+ os.path.join(self.cfg.OUT_DIR, output)+' ' + input
     return self.execCmd(cmd)
 
   def runSamtoolSort(self, input='', output='', \
                      option={'thread':8,'ram':'1000M'}):
-    if not os.path.exists(input[0]):
-      return (1, 'File not found.')
     cmd = 'samtools sort -l1 -T tmp' + \
       ' -@ '+str(option['thread']) + ' -m '+option['ram'] + \
       ' -O bam -o '+output + ' ' + input
     return self.execCmd(cmd)
 
   def runSamtoolIndex(self, input=''):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
     cmd = 'samtools index '+ input
     return self.execCmd(cmd)
 
   def runPicardMD(self, input='', output='', metric = ''):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
     common.addPath(common.APPS_DIR)
-    cmd = 'java -jar '+os.path.join(common.APPS_DIR,'picard.jar')+' MarkDuplicates'
+    cmd = 'java -jar '+os.path.join(common.APPS_DIR,'picard.jar') + ' MarkDuplicates'
     cmd += ' -I ' + input
     cmd += ' -O ' + output
     cmd += ' -M ' + metric
@@ -144,10 +134,6 @@ class apprun:
 
   def runTVC(self, input = '', outdir = '', ref = '', 
              option = { 'param' : '', 'motif' : ''}):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
-    if not os.path.exists(ref):
-      return (1, 'Reference not found.')
     common.addPath(os.path.join(common.APPS_DIR,'TVC', 'bin'))
     cmd = 'python2 '+self.cfg.APPS_DIR+'/TSVC/bin/variant_caller_pipeline.py' + \
       ' --input-bam '+input + \
@@ -159,10 +145,6 @@ class apprun:
 
   def runBCFVarCall(self, input = '', output = '', ref = '', \
                     option = {}):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
-    if not os.path.exists(ref):
-      return (1, 'Reference not found.')
     cmd = 'bcftools mpileup -Ou' + \
       ' -f ' + ref + ' ' + input + \
        ' | bcftools call -vm -Oz -o ' + output + '.gz'
@@ -205,10 +187,6 @@ class apprun:
     return self.execCmd(cmd)
 
   def runGATKVarCall(self, input = '', output = '', ref = '', option={'ram':'8g'}):
-    if not os.path.exists(input):
-      return (1, 'File not found.')
-    if not os.path.exists(ref):
-      return (1, 'Reference not found.')
     common.addPath(os.path.join(common.APPS_DIR,'gatk'))
     cmd = 'gatk'
     if option['ram']:
@@ -248,10 +226,6 @@ def runGATKVRecal(self, input = '', output = '', ref = '', \
 
 def runGDVCall(self, input = '', output = '', ref = '', \
                 option={'ram':'8g'}):
-  if not os.path.exists(input):
-    return (1, 'File not found.')
-  if not os.path.exists(ref):
-    return (1, 'Reference not found.')
   cmd = 'sudo docker run -v "' + self.cfg.WORK_SPACE + '":"/WORKSPACE"' + \
     ' google/deepvariant:"' + self.cfg.SOFTWARE_INFO['GDV']['ver'] + '"' + \
     ' /opt/deepvariant/bin/run_deepvariant --model_type=WGS' 
