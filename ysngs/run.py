@@ -10,12 +10,13 @@ class apprun:
   def printMsgLine(self, msg = ''):
     lines = msg.splitlines()
     for l in lines:
-      print(' ', l)
+      print(' >', l)
 
   def execCmd(self, cmd):
     print('Run: >', cmd)
     proc = subprocess.run(cmd, stdout=PIPE, stderr=PIPE, text=True, shell=True)
     if proc.returncode:
+      print('Error:')
       self.printMsgLine(proc.stderr)
       return False
     else:
@@ -143,22 +144,15 @@ class apprun:
       ' --output-dir ' + outdir
     return self.execCmd(cmd)
 
-  def runBCFVarCall(self, input = '', output = '', ref = '', \
-                    option = {}):
+  def runBCFVarCall(self, input = '', output = '', ref = '', option = {}):
     cmd = 'bcftools mpileup -Ou' + \
       ' -f ' + ref + ' ' + input + \
-       ' | bcftools call -vm -Oz -o ' + output + '.gz'
+       ' | bcftools call -gvm -Oz -o ' + output
     return self.execCmd(cmd)
 
   def makeGATKRefDict(self, ref = ''):
-    path, ext = os.path.splitext(ref)
-    if os.path.exists(path+'.dict'):
-      print('  Reference dict. exist.')
-      return
-    else:
-      print('  Reference dict. does not exist.')
-      cmd = 'gatk CreateSequenceDictionary -R '+ref
-      return self.execCmd(cmd)
+    cmd = 'gatk CreateSequenceDictionary -R '+ref
+    return self.execCmd(cmd)
 
   def runGATKBRecal(self, input = '', output = '', ref = '', known = '',  \
                     option={'ram':'8g'}):
@@ -187,53 +181,51 @@ class apprun:
     return self.execCmd(cmd)
 
   def runGATKVarCall(self, input = '', output = '', ref = '', option={'ram':'8g'}):
-    common.addPath(os.path.join(common.APPS_DIR,'gatk'))
+    common.addPath(os.path.join(self.cfg.APPS_DIR,'gatk'))
+    self.makeGATKRefDict(ref)
     cmd = 'gatk'
     if option['ram']:
       cmd += ' --java-options "-Xmx'+option['ram']+'"'
     cmd += ' HaplotypeCaller'
     cmd += ' -R ' + self.cfg.REFERENCE_DIR + '/' + ref + \
       ' -I ' + input + \
-      ' -O ' + output + '.g.vcf.gz -ERC GVCF'
+      ' -O ' + output + ' -ERC GVCF -G Standard -G AS_Standard'
     return self.execCmd(cmd)
-#   -G Standard \
-#   -G AS_Standard
  
-def runGATKVRecal(self, input = '', output = '', ref = '', \
-                  option={'ram':'8g'}):
-  gatkcmd = 'gatk'
-  if option['ram']:
-    gatkcmd += ' --java-options "-Xmx'+option['ram']+'"'
-  cmd = gatkcmd + ' BaseRecalibrator'
+  def runGATKVRecal(self, input = '', output = '', ref = '', \
+                    option={'ram':'8g'}):
+    gatkcmd = 'gatk'
+    if option['ram']:
+      gatkcmd += ' --java-options "-Xmx'+option['ram']+'"'
+    cmd = gatkcmd + ' BaseRecalibrator'
 
-  cmd += ' -R ' + ref
-  cmd += ' -I ' + input
-  cmd += ' -O ' + output+'_brecal.table'
+    cmd += ' -R ' + ref
+    cmd += ' -I ' + input
+    cmd += ' -O ' + output+'_brecal.table'
 #-L $i-scattered.interval_list
 #$knownSiteArg -O $out
-  res = self.execCmd(cmd)
-  if res[0]:
-    return res
-  cmd = gatkcmd + ' ApplyBQSR'
-  cmd += ' -R ' + ref
-  cmd += ' -I ' + input
-  cmd += ' -bqsr ' + output+'_brecal.table'
-  cmd += ' -O ' + output
+    res = self.execCmd(cmd)
+    if res[0]:
+      return res
+    cmd = gatkcmd + ' ApplyBQSR'
+    cmd += ' -R ' + ref
+    cmd += ' -I ' + input
+    cmd += ' -bqsr ' + output+'_brecal.table'
+    cmd += ' -O ' + output
 #-L $i-scattered.interval_list -bqsr $bqfile \
 #--static-quantized-quals 10 --static-quantized-quals 20 \
 #--static-quantized-quals 30 -O $outp
-  return self.execCmd(cmd)
+    return self.execCmd(cmd)
 
-def runGDVCall(self, input = '', output = '', ref = '', \
-                option={'ram':'8g'}):
-  cmd = 'sudo docker run -v "' + self.cfg.WORK_SPACE + '":"/WORKSPACE"' + \
-    ' google/deepvariant:"' + self.cfg.SOFTWARE_INFO['GDV']['ver'] + '"' + \
-    ' /opt/deepvariant/bin/run_deepvariant --model_type=WGS' 
-  cmd += " --ref='" + ref + "'"  
-  cmd += " --reads='"
-
-  cmd += " --output_gvcf='" + output + "'"
-  return self.execCmd(cmd)
+  def runGDVCall(self, input = '', output = '', ref = '', \
+                  option={'ram':'8g'}):
+    cmd = 'sudo docker run -v "' + self.cfg.WORK_SPACE + '":"/WORKSPACE"' + \
+      ' google/deepvariant:"' + self.cfg.SOFTWARE_INFO['GDV']['ver'] + '"' + \
+      ' /opt/deepvariant/bin/run_deepvariant --model_type=WGS' 
+    cmd += " --ref='" + ref + "'"  
+    cmd += " --reads='"
+    cmd += " --output_gvcf='" + output + "'"
+    return self.execCmd(cmd)
 
 #sudo docker run -v "/home/phys2":"/HOME" 
 # google/deepvariant:"${BIN_VERSION}" 
