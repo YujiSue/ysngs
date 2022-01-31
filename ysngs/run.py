@@ -60,7 +60,7 @@ class apprun:
       return (1, 'File not found. "'+input[0]+'"')
     if len(input) == 2 and os.path.exists(input[1]) and seqtype == 'paired':
       cmd += ' ' + input[1]
-    cmd += ' > ' + self.cfg.OUT_DIR + '/' + output + '.sam'
+    cmd += ' > ' + output
     return self.execCmd(cmd)
 
   def hasBowtRefIndex(self, ref):
