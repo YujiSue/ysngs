@@ -311,17 +311,17 @@ class installer :
     os.chdir(self.cfg.TEMPORAL)
     print('  Downloads sources ...') 
     proc = subprocess.run('wget https://jaist.dl.sourceforge.net/project/bowtie-bio/bowtie2/' + \
-      self.cfg.SOFTWARE_INFO['Bowtie']['ver']+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie']['ver']+'-source.zip', stdout=PIPE, stderr=PIPE, shell=True)
-    if proc.returncode == 0 and os.path.exists(self.cfg.TEMPORAL+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie']['ver']+'-source.zip'):
+      self.cfg.SOFTWARE_INFO['Bowtie2']['ver']+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie2']['ver']+'-source.zip', stdout=PIPE, stderr=PIPE, shell=True)
+    if proc.returncode == 0 and os.path.exists(self.cfg.TEMPORAL+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie2']['ver']+'-source.zip'):
       print('  Completed.') 
     else:
       print('  Failed.')
       return
-    proc = subprocess.run('unzip -o ./bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie']['ver']+'-source.zip', shell=True)
+    proc = subprocess.run('unzip -o ./bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie2']['ver']+'-source.zip', shell=True)
     if proc.returncode == 1:
       print('  Failed to expand sources')
       return
-    os.chdir(self.cfg.TEMPORAL+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie']['ver'])
+    os.chdir(self.cfg.TEMPORAL+'/bowtie2-' + self.cfg.SOFTWARE_INFO['Bowtie2']['ver'])
     proc = subprocess.run('make -j8', shell=True)
     if proc.returncode == 0:
       proc = subprocess.run('sudo make install', shell=True)
@@ -487,9 +487,9 @@ class installer :
       if hasGATK == False:
         self.installGATK()
     elif exe == 'Bowtie':
-      hasBT = self.checkBowtie()
-      print('Check bowtie2 ...', 'Installed.' if hasBT else 'Not installed.')
-      if hasBT == False:
+      hasBwT = self.checkBowtie()
+      print('Check bowtie2 ...', 'Installed.' if hasBwT else 'Not installed.')
+      if hasBwT == False:
         self.installBowtie()
     elif exe == 'STAR':
       hasSTAR = self.checkSTAR()

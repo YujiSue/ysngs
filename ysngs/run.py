@@ -166,8 +166,6 @@ class apprun:
     cmd += ' -I ' + input
     cmd += ' --known-sites ' + known
     cmd += ' -O ' + output+'_brecal.table'
-#-L $i-scattered.interval_list
-#$knownSiteArg -O $out
     res = self.execCmd(cmd)
     if 0 < res.returncode:
       return res.stderr
@@ -176,9 +174,6 @@ class apprun:
     cmd += ' -I ' + input
     cmd += ' -bqsr ' + output+'_brecal.table'
     cmd += ' -O ' + output
-#-L $i-scattered.interval_list -bqsr $bqfile \
-#--static-quantized-quals 10 --static-quantized-quals 20 \
-#--static-quantized-quals 30 -O $outp
     return self.execCmd(cmd)
 
   def runGATKVarCall(self, input = '', output = '', ref = '', option={'ram':'8g'}):
