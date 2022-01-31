@@ -33,8 +33,9 @@ class apprun:
   
   def runBWA(self, seqtype='single', input=[], ref='', output='', \
              option={'thread':8, 'checksr':True, 'refpath':None, 'addRG':False, 'rgroup':''}):
-    if not os.path.exists(input):
-      return (1, 'No input.')
+    for f in input:
+      if not os.path.exists(f):
+        return (1, 'No input.')
     common.addPath(self.cfg.APPS_DIR)
     if not (len(ref) and self.hasBWARefIndex(ref)):
       res = self.makeBWARefIndex(option['refpath'], ref)
