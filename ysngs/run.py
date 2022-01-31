@@ -9,7 +9,13 @@ class apprun:
 
   def execCmd(self, cmd):
     print('  Run: >', cmd)
-    return subprocess.run(cmd, stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run(cmd, stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode:
+      print(proc.stderr)
+      return False
+    else:
+      print(proc.stdout)
+      return True
     
   def downloadSRA(self, srid, output = '.', option = {'thread':8}):
     cmd = 'fasterq-dump ' + srid + ' -O ' + output
@@ -35,12 +41,11 @@ class apprun:
              option={'thread':8, 'checksr':True, 'refpath':None, 'addRG':False, 'rgroup':''}):
     for f in input:
       if not os.path.exists(f):
-        return (1, 'No input.')
+        print('  ', f, ' is not found.')
+        return False
     common.addPath(self.cfg.APPS_DIR)
-    if not (len(ref) and self.hasBWARefIndex(ref)):
+    if not self.hasBWARefIndex(ref):
       res = self.makeBWARefIndex(option['refpath'], ref)
-      if res[0]:
-        return res
     cmd = 'bwa mem '
     if 'thread' in option:
       cmd += '-t '+str(option['thread'])

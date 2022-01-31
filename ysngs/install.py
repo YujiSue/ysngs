@@ -30,7 +30,7 @@ class installer :
     common.addPath(self.cfg.APPS_DIR + '/sra')
     proc = subprocess.run('cp ./sratoolkit*/bin/* '+self.cfg.APPS_DIR+'/sra', shell=True)
     proc = subprocess.run('rm -r ./sratoolkit*', shell=True)
-    proc = subprocess.run('vdb-config --interactive', shell=True)
+    proc = subprocess.run('vdb-config', shell=True)
     proc = subprocess.run('test-sra | grep "NCBI SRA Toolkit release version:" | head -n 1', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('Completed.')
     os.chdir(self.cfg.WORK_SPACE)
