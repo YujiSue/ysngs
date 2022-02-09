@@ -1,7 +1,7 @@
 import os
 import subprocess
 from subprocess import PIPE
-import ysngs.common as common
+import common as common
 
 class installer :
   def __init__(self, config):
@@ -30,7 +30,6 @@ class installer :
     common.addPath(self.cfg.APPS_DIR + '/sra')
     os.system('cp ./sratoolkit*/bin/* ' + os.path.join(self.cfg.APPS_DIR,'sra'))
     os.system('rm -r ./sratoolkit*')
-    os.system('vdb-config')
     proc = subprocess.run('test-sra | grep "NCBI SRA Toolkit release version:" | head -n 1', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('Completed.')
     os.chdir(self.cfg.WORK_SPACE)
@@ -47,6 +46,13 @@ class installer :
     print('Completed.')
     proc = subprocess.run('cutadapt --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('> ', proc.stdout.splitlines()[0])
+  
+  def checkFP(self):
+    return os.path.exists(os.path.join(self.cfg.APP_DIR, 'fastp'))
+  
+  def installFP(self):
+    print('Install fastp  ...')
+    
   
   def checkBWA(self):
     return os.path.exists(self.cfg.APPS_DIR + '/bwa')
@@ -461,6 +467,16 @@ class installer :
       print('Check SRA ...', 'Installed.' if hasSRA else 'Not installed.')
       if not hasSRA:
         self.installSRA()
+    elif exe == 'Cutter':
+      hasCut = self.checkCut()
+      print('Check CutAdapt ...', 'Installed.' if hasCut else 'Not installed.')
+      if not hasCut:
+        self.installCut()
+    elif exe == 'FP':
+      hasFP = self.checkFP()
+      print('Check fastp ...', 'Installed.' if hasFP else 'Not installed.')
+      if not hasFP:
+        self.installFP()
     elif exe == 'BWA':
       hasBWA = self.checkBWA()
       print('Check BWA ...', 'Installed.' if hasBWA else 'Not installed.')
@@ -479,22 +495,22 @@ class installer :
     elif exe == 'Picard':
       hasPicard = self.checkPicard()
       print('Check Picard ...', 'Installed.' if hasPicard else 'Not installed.')
-      if hasPicard == False:
+      if not hasPicard:
         self.installPicard()
     elif exe == 'GATK':
       hasGATK = self.checkGATK()
       print('Check GATK ...', 'Installed.' if hasGATK else 'Not installed.')
-      if hasGATK == False:
+      if not hasGATK:
         self.installGATK()
     elif exe == 'Bowtie':
       hasBwT = self.checkBowtie()
       print('Check bowtie2 ...', 'Installed.' if hasBwT else 'Not installed.')
-      if hasBwT == False:
+      if not hasBwT:
         self.installBowtie()
     elif exe == 'STAR':
       hasSTAR = self.checkSTAR()
       print('Check STAR ...', 'Installed.' if hasSTAR else 'Not installed.')
-      if hasSTAR == False:
+      if not hasSTAR:
         self.installSTAR()
     elif exe == 'TVC':
       hasTVC = self.checkTVC()
@@ -504,15 +520,15 @@ class installer :
     elif exe == 'Cuff':
       hasCuff = self.checkCuff()
       print('Check Cufflinks ...', 'Installed.' if hasCuff else 'Not installed.')
-      if hasCuff == False:
+      if not hasCuff:
          self.installCuff()
     elif exe == 'MACS':
       hasMACS = self.checkMACS()
       print('Check MACS2 ...', 'Installed.' if hasMACS else 'Not installed.')
-      if hasMACS == False:
+      if not hasMACS:
         self.installMACS()
     elif exe == 'MEME':
       hasMEME = self.checkMEME()
       print('Check MEME ...', 'Installed.' if hasMEME else 'Not installed.')
-      if hasMEME == False:
+      if not hasMEME:
         self.installMEME()
