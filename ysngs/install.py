@@ -48,11 +48,16 @@ class installer :
     print('> ', proc.stdout.splitlines()[0])
   
   def checkFP(self):
-    return os.path.exists(os.path.join(self.cfg.APP_DIR, 'fastp'))
+    return os.path.exists(os.path.join(self.cfg.APPS_DIR, 'fastp'))
   
   def installFP(self):
     print('Install fastp  ...')
-    
+    proc = subprocess.run('wget http://opengene.org/fastp/fastp -O '+os.path.join(self.cfg.APPS_DIR, 'fastp'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run('chmod a+x '+os.path.join(self.cfg.APPS_DIR, 'fastp'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    print('Completed.')
+    common.addPath(self.cfg.APPS_DIR)
+    proc = subprocess.run('fastp --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
+    print('> ', proc.stdout.splitlines()[0])
   
   def checkBWA(self):
     return os.path.exists(self.cfg.APPS_DIR + '/bwa')

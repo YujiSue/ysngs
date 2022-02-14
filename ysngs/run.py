@@ -363,11 +363,11 @@ class apprun:
     cmd += ' --output_vcf ' + os.path.join('/OUTPUT_DIR', oname)
     return self.execCmd(cmd)
 
-  def runHTSeqCount(self, input = '', gtk = '', output = ''):
-    cmd = 'htseq-count -r pos -t exon -f ' + input + ' ' + gtk + ' > ' + output
+  def runHTSeqCount(self, input = '', annotation = '', output = ''):
+    cmd = 'htseq-count -r pos -t exon -f ' + input + ' ' + annotation + ' > ' + output
     return self.execCmd(cmd)
 #htseq-count -f bam align.bam reference.gtf > count.txt
-  def runCufflinks(self, input = ''):
+  def runCufflinks(self, input = '', annotation = '', output = ''):
     cmd = 'cufflinks'
 
     
