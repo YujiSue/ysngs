@@ -57,7 +57,7 @@ class installer :
     print('Completed.')
     common.addPath(self.cfg.APPS_DIR)
     proc = subprocess.run('fastp --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
-    print('> ', proc.stdout.splitlines()[0])
+    print('> ', proc.stderr.splitlines()[0])
   
   def checkBWA(self):
     return os.path.exists(self.cfg.APPS_DIR + '/bwa')
