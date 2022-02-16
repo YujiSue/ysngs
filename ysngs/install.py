@@ -386,6 +386,21 @@ class installer :
       if ("version" in line) :
         print('> ', line)
         break
+  
+  def CheckHTSeq(self):
+    proc = subprocess.run('which htseq-count', stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode == 0 and proc.stdout:
+      return os.path.exists(proc.stdout.splitlines()[0])
+
+  def installHTSeq(self):
+    print('Install HTSeq ...')
+    proc = subprocess.run('pip install HTSeq', stdout=PIPE, stderr=PIPE, shell=True)
+    if proc.returncode == 0:
+      print('Completed.') 
+    else:
+      print('Failed.')
+    proc = subprocess.run('htseq-count --version', stdout=PIPE, stderr=PIPE, shell=True)
+    print('> ', proc.stdout.splitlines()[0])
 
   def checkCuff(self):
     return os.path.exists(self.cfg.APPS_DIR+'/cuff/cufflinks')
@@ -522,6 +537,11 @@ class installer :
       print('Check TVC ...', 'Installed.' if hasTVC else 'Not installed.')
       if not hasTVC:
         self.installTVC()
+    elif exe == 'HTS':
+      hasHTS = self.checkCuff()
+      print('Check HTSeq ...', 'Installed.' if hasHTS else 'Not installed.')
+      if not hasHTS:
+         self.installHTSeq()
     elif exe == 'Cuff':
       hasCuff = self.checkCuff()
       print('Check Cufflinks ...', 'Installed.' if hasCuff else 'Not installed.')

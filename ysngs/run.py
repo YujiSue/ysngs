@@ -195,9 +195,12 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSamtoolSort(self, input='', output='', option = {}):
-    cmd = 'samtools sort -l1 -T tmp' + \
-      ' -@ '+str(option['thread']) + ' -m '+str(option['ram']*1000)+'M' + \
-      ' -O bam -o '+output + ' ' + input
+    cmd = 'samtools sort -l1 -T tmp'
+    if 'thread' in option:
+      cmd += ' -@ '+str(option['thread'])
+    if 'ram' in option:
+      ' -m '+str(1000 if option['ram'] > 1 else int(option['ram']*1000))+'M'
+    cmd += ' -O bam -o '+output + ' ' + input
     return self.execCmd(cmd)
 
   def runSamtoolIndex(self, input=''):
