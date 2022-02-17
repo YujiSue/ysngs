@@ -429,6 +429,15 @@ class installer :
     print('Completed.')
     print('> ', proc.stderr.splitlines()[0])
 
+  def installBM(self):
+    os.system('curl --output ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
+    proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode == 0 and proc.stdout:
+      print('out:',proc.stdout.splitlines()[-1])
+      print('err:',proc.stderr.splitlines()[-1])
+      return os.path.exists(proc.stdout.splitlines()[-1])
+  
+
   def checkMACS(self):
     proc = subprocess.run('which macs2', stdout=PIPE, stderr=PIPE, text=True, shell=True)
     if proc.returncode == 0 and proc.stdout:
@@ -547,6 +556,8 @@ class installer :
       print('Check Cufflinks ...', 'Installed.' if hasCuff else 'Not installed.')
       if not hasCuff:
          self.installCuff()
+    elif exe == 'BiocManager':
+      self.installBM()
     elif exe == 'MACS':
       hasMACS = self.checkMACS()
       print('Check MACS2 ...', 'Installed.' if hasMACS else 'Not installed.')
