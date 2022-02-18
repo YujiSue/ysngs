@@ -19,6 +19,7 @@ class config :
       'Bowtie2': {'ver':'2.4.4' },
       'STAR': {'ver':'2.7.9a' },
       'Cuff': {'ver':'2.2.1' },
+      'BiocManager': {'ver':'' },
       'MACS': {'ver':'2.2.7.1' },
       'MEME':{'ver':'5.4.1' }
     }
@@ -33,6 +34,7 @@ class config :
     self.REFERENCE_DIR = os.path.join(self.WORK_SPACE, 'Reference')
     self.PREFERENCE_DIR = os.path.join(self.WORK_SPACE, 'Preference')
     self.SAMPLE_DIR = os.path.join(self.WORK_SPACE, 'Sample')
+    self.SCRIPT_DIR = os.path.join(self.WORK_SPACE, 'Script')
     self.TEMPORAL = os.path.join(self.WORK_SPACE, 'temp')
     self.TEST_DIR = os.path.join(self.WORK_SPACE, 'Test')
     self.OUT_DIR = os.path.join(self.WORK_SPACE, 'Output')
@@ -48,6 +50,8 @@ class config :
       self.PREFERENCE_DIR = dirs['pref']
     if 'sample' in dirs:
       self.SAMPLE_DIR = dirs['sample']
+    if 'script' in dirs:
+      self.SCRIPT_DIR = dirs['script']
     if 'tmp' in dirs:
       self.TEMPORAL = dirs['tmp']
     if 'test' in dirs:
@@ -61,6 +65,7 @@ class config :
     os.makedirs(self.REFERENCE_DIR,exist_ok=True)
     os.makedirs(self.PREFERENCE_DIR,exist_ok=True)
     os.makedirs(self.SAMPLE_DIR,exist_ok=True)
+    os.makedirs(self.SCRIPT_DIR,exist_ok=True)
     os.makedirs(self.TEMPORAL,exist_ok=True)
     os.makedirs(self.TEST_DIR,exist_ok=True)
     os.makedirs(self.OUT_DIR,exist_ok=True)
