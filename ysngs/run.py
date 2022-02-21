@@ -27,7 +27,29 @@ class apprun:
         self.printMsgLine('Completed.')
         print('')
       return True
-    
+  
+  def runRScript(self, script, output = '', args = []):
+    cmd = 'R --no-save --slave --vanilla'
+    if len(args):
+      cmd += ' --args'
+      for arg in args:
+        cmd += ' ' + str(arg)
+    cmd += ' < ' + script
+    if os.path.exists(output):
+      cmd += ' > ' + output
+    print('Run: >', cmd)
+    proc = subprocess.run(cmd, stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode:
+      print('Error:')
+      self.printMsgLine(proc.stderr)
+      print('')
+      return False
+    else:
+      self.printMsgLine(proc.stdout)
+      self.printMsgLine('Completed.')
+      print('')
+      return True
+
   def downloadSRA(self, srid, output = '.', option = {'thread':8}):
     cmd = 'fasterq-dump ' + srid + ' -O ' + output
     if option['thread']:
@@ -43,6 +65,11 @@ class apprun:
     elif site == 'both':
       cmd += ' -b'
     cmd += ' ' + adaptor + ' ' + input + ' > ' + output
+    return self.execCmd(cmd)
+  
+  def runFastQC(self, input = '', output = ''):
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'FastQC'))
+    cmd = 'fastqc -o ' + output + ' ' + input + ' &'
     return self.execCmd(cmd)
 
   def runFastQFilter(self, input = '', output = '', param = {}):
@@ -256,8 +283,7 @@ class apprun:
     cmd = 'gatk IndexFeatureFile -I ' + feature
     return self.execCmd(cmd)
 
-  def runGATKBRecal(self, input = '', output = '', ref = '', known = '',  \
-                    option={'ram':8}):
+  def runGATKBRecal(self, input = '', output = '', ref = '', known = '', option={}):
     common.addPath(os.path.join(self.cfg.APPS_DIR,'gatk'))
     if not self.hasGATKRefDict(ref):
       res = self.makeGATKRefDict(ref)
@@ -268,7 +294,7 @@ class apprun:
       if not res:
         print(' Feature index construction error.')
     gatkcmd = 'gatk'
-    if option['ram']:
+    if 'ram' in option:
       gatkcmd += ' --java-options "-Xmx' + str(option['ram'])+'g"'
     cmd = gatkcmd + ' BaseRecalibrator'
     cmd += ' -R ' + ref
@@ -292,7 +318,7 @@ class apprun:
       if not res:
         print(' Reference dictionary (.dict) construction error.')
     cmd = 'gatk'
-    if option['ram']:
+    if 'ram' in option:
       cmd += ' --java-options "-Xmx' + str(option['ram'])+'g"'
     cmd += ' HaplotypeCaller'
     if 'target' in option and os.path.exists(option['target']):
@@ -306,7 +332,7 @@ class apprun:
       print(' Failed to export gvcf.')
       return
     cmd = 'gatk'
-    if option['ram']:
+    if 'ram' in option:
       cmd += ' --java-options "-Xmx' + str(option['ram'])+'g"'
     cmd += ' GenotypeGVCFs'
     cmd += ' -R ' + ref + \
@@ -314,15 +340,15 @@ class apprun:
       ' -O ' + output + '.vcf.gz'
     return self.execCmd(cmd)
     
-  def runGATKVRecal(self, input = '', output = '', ref = '', \
-                    option={'ram':8}):
+  def runGATKVRecal(self, input = '', output = '', ref = '', resource = [], option={}):
     gatkcmd = 'gatk'
-    if option['ram']:
+    if 'ram' in option:
       gatkcmd += ' --java-options "-Xmx' + str(option['ram'])+'g"'
     cmd = gatkcmd + ' VariantRecalibrator'
     cmd += ' -R ' + ref + \
-     ' -V ' + input + \
+    ' -V ' + input + \
     ' -O ' + output + '_snp.recal'
+
     cmd += ' -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -mode SNP'
     cmd += ' --tranches-file ' + output + '_snp.tranches'
     res = self.execCmd(cmd)
@@ -366,20 +392,69 @@ class apprun:
     cmd += ' --output_vcf ' + os.path.join('/OUTPUT_DIR', oname)
     return self.execCmd(cmd)
 
-  def runHTSeqCount(self, input = '', annotation = '', output = ''):
-    cmd = 'htseq-count -r pos -t exon -f ' + input + ' ' + annotation + ' > ' + output
+  def runHTSeqCount(self, input = '', annotation = '', output = '',  option = {}):
+    cmd = 'htseq-count -r pos -t exon -f bam'
+    if 'qual' in option:
+      cmd += ' -a ' + str(option['qual'])
+    if 'thread' in option:
+      cmd += ' -n ' + str(option['thread'])
+    cmd + input + ' ' + annotation + ' > ' + output
     return self.execCmd(cmd)
-#htseq-count -f bam align.bam reference.gtf > count.txt
-  def runCufflinks(self, input = '', annotation = '', output = ''):
-    cmd = 'cufflinks'
 
-    
+  def runCufflinks(self, input = '', annotation = '', output = '', option = {}):
+    cmd = 'cufflinks --no-update-check'
+    if 'platform' in option:
+      if option['platform'] == 'ion':
+        cmd += ' --library-type fr-secondstrand'
+      else:
+        cmd += ' --library-type fr-unstranded'
+    if 'novel' in option and option['novel']:
+      cmd += ' -g ' + annotation
+    else:
+      cmd += ' -G ' + annotation
+    if 'mask' in option and os.path.exists(option['mask']):
+      cmd += ' -M ' + option['mask']
+    if 'thread' in option:
+      cmd += ' -p ' + option['thread']
+    cmd += ' -o ' + output + ' ' + input
+    return self.execCmd(cmd)
+  
+  def runCuffDiff(self, input = '', groups = [], labels = [], reference = '', output = '', option = {}):
+    cmd = 'cuffdiff --no-update-check'
+    if 'platform' in option:
+      if option['platform'] == 'ion':
+        cmd += ' --library-type fr-secondstrand'
+      else:
+        cmd += ' --library-type fr-unstranded'
+    if 'mask' in option and os.path.exists(option['mask']):
+      cmd += ' -M ' + option['mask']
+    if 'mincount' in option:
+      cmd += ' -c ' + str(option['mincount'])
+    if 'thread' in option:
+      cmd += ' -p ' + option['thread']
+    if 'control' in option and option['control']:
+      cmd += ' -g ' + option['control']
+    cmd += ' -u -b ' + reference + ' -o ' + output
+    for label in labels:
+      cmd += label + ','
+    cmd[-1] = ' '
+    cmd += input
+    for group in groups:
+      cmd += ' '
+      for reads in group:
+        cmd += reads + ','
+      cmd = cmd[:-1]
     return self.execCmd(cmd)
 
-  #-q -p 12 -m 100 -s 60 -G $GENE_GTF -M $RRNA_MASK \
- # --library-type fr-secondstrand --max-bundle-length 3500000 \
- # -o $OUT_CUFFLINKS --no-update-check \
- # ${fastqName}.STARBowtie2.bam"
+  def runCuffMerge(self, input = '', reference = '', option = {}):
+    cmd = 'cuffmerge --no-update-check'
+    if 'thread' in option:
+      cmd += ' -p ' + option['thread']
+    cmd += ' -s ' + reference + ' ' + input
+    return self.execCmd(cmd)
+
+  def runEdgeR(self, script = '', output = '', args = []):
+    return self.runRScript(script, output, args)
 
   def runMACS2(self, input = '', control = None, output = '', species = '', genome = 0, 
               option = { 'bload' : True, 'lambda' : True, 'p-val' : -1, 'q-val': -1}):

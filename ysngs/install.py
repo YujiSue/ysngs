@@ -47,6 +47,22 @@ class installer :
     proc = subprocess.run('cutadapt --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
     print('> ', proc.stdout.splitlines()[0])
   
+  def checkFQC(self):
+    return os.path.exists(os.path.join(self.cfg.APPS_DIR, 'FastQC', 'fastqc'))
+
+  def installFQC(self):
+    print('Install FastQC  ...')
+    os.chdir(self.cfg.TEMPORAL)
+    proc = subprocess.run('wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v'+self.cfg.SOFTWARE_INFO['fastQC']['ver']+'.zip', stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run('unzip fastqc_v'+self.cfg.SOFTWARE_INFO['fastQC']['ver']+'.zip', stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run('mv FastQC '+self.cfg.APPS_DIR, stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run('chmod a+x '+os.path.join(self.cfg.APPS_DIR, 'FastQC', 'fastqc'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    print('Completed.')
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'FastQC'))
+    os.chdir(self.cfg.WORK_SPACE)
+    proc = subprocess.run('fastqc --version &', shell=True, stdout=PIPE, stderr=PIPE, text=True)
+    print('> ', proc.stderr.splitlines()[0])
+  
   def checkFP(self):
     return os.path.exists(os.path.join(self.cfg.APPS_DIR, 'fastp'))
   
@@ -429,14 +445,29 @@ class installer :
     print('Completed.')
     print('> ', proc.stderr.splitlines()[0])
 
+  def installRSEM(self):
+    print('Install RSEM ...')
+    #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    #if proc.returncode == 0 and proc.stdout:
+    #  print('> ',proc.stdout.splitlines()[-1])
+  
   def installBM(self):
     os.system('curl --output ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
     proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
     if proc.returncode == 0 and proc.stdout:
-      print('out:',proc.stdout.splitlines()[-1])
-      print('err:',proc.stderr.splitlines()[-1])
-      return os.path.exists(proc.stdout.splitlines()[-1])
+      print('> ',proc.stdout.splitlines()[-1])
   
+  def installEdgeR(self):
+    os.system('curl --output ' + os.path.join(self.cfg.SCRIPT_DIR, 'installEdgeR.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installEdgeR.R')
+    proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installEdgeR.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode == 0 and proc.stdout:
+      print('> ',proc.stdout.splitlines()[-1])
+  
+  def installCumme(self):
+    os.system('curl --output ' + os.path.join(self.cfg.SCRIPT_DIR, 'installcummeR.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installcummeR.R')
+    proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installcummeR.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode == 0 and proc.stdout:
+      print('> ',proc.stdout.splitlines()[-1])
 
   def checkMACS(self):
     proc = subprocess.run('which macs2', stdout=PIPE, stderr=PIPE, text=True, shell=True)
@@ -501,6 +532,11 @@ class installer :
       print('Check CutAdapt ...', 'Installed.' if hasCut else 'Not installed.')
       if not hasCut:
         self.installCut()
+    elif exe == 'FQC':
+      hasFQC = self.checkFQC()
+      print('Check FastQC ...', 'Installed.' if hasFQC else 'Not installed.')
+      if not hasFQC:
+        self.installFQC()
     elif exe == 'FP':
       hasFP = self.checkFP()
       print('Check fastp ...', 'Installed.' if hasFP else 'Not installed.')

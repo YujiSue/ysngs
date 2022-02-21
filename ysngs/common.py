@@ -9,6 +9,7 @@ class config :
     self.SOFTWARE_INFO = {
       'SRA': { 'ver' : '2.11.3' },
       'fastp': { 'ver' : '0.23.2' },
+      'fastQC': {'ver' : '0.11.9' },
       'BWA': { 'ver':'0.7.17' },
       'TVC': { 'ver':'5.12.1' },
       'SAMTools': {'ver':'1.14' },
@@ -19,7 +20,7 @@ class config :
       'Bowtie2': {'ver':'2.4.4' },
       'STAR': {'ver':'2.7.9a' },
       'Cuff': {'ver':'2.2.1' },
-      'BiocManager': {'ver':'' },
+      'BiocManager': {'ver':'3.14' },
       'MACS': {'ver':'2.2.7.1' },
       'MEME':{'ver':'5.4.1' }
     }
