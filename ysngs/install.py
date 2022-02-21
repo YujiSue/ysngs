@@ -61,7 +61,7 @@ class installer :
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'FastQC'))
     os.chdir(self.cfg.WORK_SPACE)
     proc = subprocess.run('fastqc --version &', shell=True, stdout=PIPE, stderr=PIPE, text=True)
-    print('> ', proc.stderr.splitlines()[0])
+    print('> ', proc.stdout.splitlines()[0])
   
   def checkFP(self):
     return os.path.exists(os.path.join(self.cfg.APPS_DIR, 'fastp'))

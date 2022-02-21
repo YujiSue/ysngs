@@ -51,12 +51,14 @@ class apprun:
       return True
 
   def downloadSRA(self, srid, output = '.', option = {'thread':8}):
+    os.chdir(self.cfg.TEMPORAL)
     cmd = 'fasterq-dump ' + srid + ' -O ' + output
     if option['thread']:
       cmd += ' -e ' + str(option['thread'])
     return self.execCmd(cmd)
 
   def runCutter(self, adaptor = '', site = '', input = '', output = ''):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cutadapt'
     if site == '5p':
       cmd += ' -g'
@@ -69,11 +71,14 @@ class apprun:
   
   def runFastQC(self, input = '', output = ''):
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'FastQC'))
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'fastqc -o ' + output + ' ' + input + ' &'
     return self.execCmd(cmd)
 
   def runFastQFilter(self, input = '', output = '', param = {}):
     common.addPath(self.cfg.APPS_DIR)
+    dir, name = os.path.split(input)
+    os.chdir(dir)
     cmd = 'fastp -i ' + input + ' -o ' + output
     if 'min_qual' in param:
       cmd += ' -q ' + str(param['min_qual'])
@@ -144,6 +149,7 @@ class apprun:
   
   def runBowtie2(self, seqtype='single', input=[], ref='', output='', \
                  option={'thread':8, 'checksr':True, 'refpath':None, 'addRG':False, 'rgroup':{}}):
+    os.chdir(self.cfg.WORK_SPACE)
     if not self.hasFai(option['refpath']):
       res = self.makeFai(option['refpath'])
       if not res:
@@ -186,7 +192,9 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSTAR(self, seqtype='single', input=[], ref='', output='', \
-              option={'thread':8, 'annotate':True, 'gtf':None, 'refpath':None}):
+              option={'thread':8, 'annotate':True, 'annotation':None, 'refpath':None}):
+    common.addPath(self.cfg.APPS_DIR)
+    os.chdir(self.cfg.WORK_SPACE)
     if not self.hasFai(option['refpath']):
       res = self.makeFai(option['refpath'])
       if not res:
@@ -194,17 +202,16 @@ class apprun:
         return
     if not self.hasSTARRefIndex(os.path.join(self.cfg.REFERENCE_DIR, ref)):
       self.makeSTARRefIndex(refpath = option['refpath'], refname = ref, option = option)
-    
     cmd = 'STAR --runMode genomeGenerate' + \
       ' --genomeDir ' + self.cfg.REFERENCE_DIR + ' --genomeFastaFiles ' + ref
-    
-    if option['annotate'] and os.path.exists(option['gtf']):
-      cmd += ' --sjdbGTFfile ' + option['gtf']
+    if 'annotate' in option and option['annotate'] and os.path.exists(option['annotation']):
+      cmd += ' --sjdbGTFfile ' + option['annotation']
     if option['thread']:
       cmd += ' --runThreadN ' + option['thread']
     return self.execCmd(cmd)
 
   def runSamtool2Fq(self, seqtype='single', input='', outdir='', outname = ''):
+    os.chdir(self.cfg.WORK_SPACE)
     if seqtype == 'single':
       cmd = 'samtools fastq -0 /dev/null ' + input + ' > ' + os.path.join(outdir, outname + '.fq')
     else:
@@ -215,6 +222,7 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSamtool2BAM(self, input='',output='',option={}):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'samtools view'
     if 'thread' in option:
       cmd += ' -@ '+str(option['thread'])
@@ -222,6 +230,7 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSamtoolSort(self, input='', output='', option = {}):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'samtools sort -l1 -T tmp'
     if 'thread' in option:
       cmd += ' -@ '+str(option['thread'])
@@ -231,11 +240,13 @@ class apprun:
     return self.execCmd(cmd)
 
   def runSamtoolIndex(self, input=''):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'samtools index '+ input
     return self.execCmd(cmd)
 
   def runPicardMD(self, input='', output='', metric = ''):
     common.addPath(self.cfg.APPS_DIR)
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'java -jar '+os.path.join(self.cfg.APPS_DIR,'picard.jar') + ' MarkDuplicates'
     cmd += ' -I ' + input
     cmd += ' -O ' + output
@@ -245,6 +256,7 @@ class apprun:
   def runTVC(self, input = '', output = '', ref = '', 
              option = { 'param' : '', 'motif' : '', 'thread':8, 'target':None, 'hotspot': None }):
     common.addPath(os.path.join(self.cfg.APPS_DIR,'TVC', 'bin'))
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'python2 ' + os.path.join(self.cfg.APPS_DIR, 'TVC', 'bin', 'variant_caller_pipeline.py') + \
       ' --input-bam '+input + \
       ' --reference-fasta ' + ref + \
@@ -263,6 +275,7 @@ class apprun:
     return self.execCmd(cmd)
 
   def runBCFVarCall(self, input = '', output = '', ref = '', option = {}):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'bcftools mpileup -Ou' + \
       ' -f ' + ref + ' ' + input + \
        ' | bcftools call -vm -Oz -o ' + output + '.vcf.gz'
@@ -285,6 +298,7 @@ class apprun:
 
   def runGATKBRecal(self, input = '', output = '', ref = '', known = '', option={}):
     common.addPath(os.path.join(self.cfg.APPS_DIR,'gatk'))
+    os.chdir(self.cfg.WORK_SPACE)
     if not self.hasGATKRefDict(ref):
       res = self.makeGATKRefDict(ref)
       if not res:
@@ -313,6 +327,7 @@ class apprun:
 
   def runGATKVarCall(self, input = '', output = '', ref = '', option={}):
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'gatk'))
+    os.chdir(self.cfg.WORK_SPACE)
     if not self.hasGATKRefDict(ref):
       res = self.makeGATKRefDict(ref)
       if not res:
@@ -341,6 +356,8 @@ class apprun:
     return self.execCmd(cmd)
     
   def runGATKVRecal(self, input = '', output = '', ref = '', resource = [], option={}):
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'gatk'))
+    os.chdir(self.cfg.WORK_SPACE)
     gatkcmd = 'gatk'
     if 'ram' in option:
       gatkcmd += ' --java-options "-Xmx' + str(option['ram'])+'g"'
@@ -365,6 +382,7 @@ class apprun:
     
   def runGDVCall(self, input = '', output = '', ref = '', \
                   option={'gpu': False, 'processor':4, 'target': ''}):
+    os.chdir(self.cfg.WORK_SPACE)
     idir, iname = os.path.split(input)
     odir, oname = os.path.split(output)
     rdir, rname = os.path.split(ref)
@@ -393,6 +411,7 @@ class apprun:
     return self.execCmd(cmd)
 
   def runHTSeqCount(self, input = '', annotation = '', output = '',  option = {}):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'htseq-count -r pos -t exon -f bam'
     if 'qual' in option:
       cmd += ' -a ' + str(option['qual'])
@@ -402,6 +421,8 @@ class apprun:
     return self.execCmd(cmd)
 
   def runCufflinks(self, input = '', annotation = '', output = '', option = {}):
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'cuff'))
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cufflinks --no-update-check'
     if 'platform' in option:
       if option['platform'] == 'ion':
@@ -420,6 +441,8 @@ class apprun:
     return self.execCmd(cmd)
   
   def runCuffDiff(self, input = '', groups = [], labels = [], reference = '', output = '', option = {}):
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'cuff'))
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cuffdiff --no-update-check'
     if 'platform' in option:
       if option['platform'] == 'ion':
@@ -447,6 +470,8 @@ class apprun:
     return self.execCmd(cmd)
 
   def runCuffMerge(self, input = '', reference = '', option = {}):
+    common.addPath(os.path.join(self.cfg.APPS_DIR, 'cuff'))
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cuffmerge --no-update-check'
     if 'thread' in option:
       cmd += ' -p ' + option['thread']
@@ -454,10 +479,12 @@ class apprun:
     return self.execCmd(cmd)
 
   def runEdgeR(self, script = '', output = '', args = []):
+    os.chdir(self.cfg.WORK_SPACE)
     return self.runRScript(script, output, args)
 
   def runMACS2(self, input = '', control = None, output = '', species = '', genome = 0, 
               option = { 'bload' : True, 'lambda' : True, 'p-val' : -1, 'q-val': -1}):
+    os.chdir(self.cfg.WORK_SPACE)
     cmd = 'macs2 callpeak -f BAM -t ' + input
     if control :
       cmd = ' -c ' + control
