@@ -182,13 +182,13 @@ class apprun:
     return os.path.exists(refdir)
 
   def makeSTARRefIndex(self, refpath='', refname='', \
-                    option={'thread':8, 'annotate':True, 'gtf':None}):
+                    option={'thread':8, 'annotate':True, 'annotation':None}):
     cmd = 'STAR --runMode genomeGenerate' + \
       ' --genomeDir ' + os.path.join(self.cfg.REFERENCE_DIR, refname) + ' --genomeFastaFiles ' + refpath
-    if option['annotate'] and os.path.exists(option['gtf']):
-      cmd += ' --sjdbGTFfile ' + option['gtf']
+    if 'annotate' in option and option['annotate'] and os.path.exists(option['annotation']):
+      cmd += ' --sjdbGTFfile ' + option['annotation']
     if option['thread']:
-      cmd += ' --runThreadN ' + option['thread']
+      cmd += ' --runThreadN ' + str(option['thread'])
     return self.execCmd(cmd)
 
   def runSTAR(self, seqtype='single', input=[], ref='', output='', \
@@ -202,12 +202,14 @@ class apprun:
         return
     if not self.hasSTARRefIndex(os.path.join(self.cfg.REFERENCE_DIR, ref)):
       self.makeSTARRefIndex(refpath = option['refpath'], refname = ref, option = option)
-    cmd = 'STAR --runMode genomeGenerate' + \
-      ' --genomeDir ' + self.cfg.REFERENCE_DIR + ' --genomeFastaFiles ' + ref
-    if 'annotate' in option and option['annotate'] and os.path.exists(option['annotation']):
-      cmd += ' --sjdbGTFfile ' + option['annotation']
+    cmd = 'STAR --outSAMtype BAM SortedByCoordinate' + \
+      ' --genomeDir ' + os.path.join(self.cfg.REFERENCE_DIR, ref)
+    cmd += ' --readFilesIn'
+    for f in input:
+      cmd += ' ' + f 
     if option['thread']:
-      cmd += ' --runThreadN ' + option['thread']
+      cmd += ' --runThreadN ' + str(option['thread'])
+    cmd += ' --outFileNamePrefix ' + output
     return self.execCmd(cmd)
 
   def runSamtool2Fq(self, seqtype='single', input='', outdir='', outname = ''):
@@ -417,7 +419,7 @@ class apprun:
       cmd += ' -a ' + str(option['qual'])
     if 'thread' in option:
       cmd += ' -n ' + str(option['thread'])
-    cmd + input + ' ' + annotation + ' > ' + output
+    cmd += ' ' + input + ' ' + annotation + ' > ' + output
     return self.execCmd(cmd)
 
   def runCufflinks(self, input = '', annotation = '', output = '', option = {}):
@@ -436,7 +438,7 @@ class apprun:
     if 'mask' in option and os.path.exists(option['mask']):
       cmd += ' -M ' + option['mask']
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     cmd += ' -o ' + output + ' ' + input
     return self.execCmd(cmd)
   
@@ -454,7 +456,7 @@ class apprun:
     if 'mincount' in option:
       cmd += ' -c ' + str(option['mincount'])
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     if 'control' in option and option['control']:
       cmd += ' -g ' + option['control']
     cmd += ' -u -b ' + reference + ' -o ' + output
@@ -474,7 +476,7 @@ class apprun:
     os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cuffmerge --no-update-check'
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     cmd += ' -s ' + reference + ' ' + input
     return self.execCmd(cmd)
 

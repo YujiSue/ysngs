@@ -20,6 +20,8 @@ class config :
       'Bowtie2': {'ver':'2.4.4' },
       'STAR': {'ver':'2.7.9a' },
       'Cuff': {'ver':'2.2.1' },
+      'HTSeq': {'ver':'1.99.2' },
+      'RSEM': {'ver':'1.3.3' },
       'BiocManager': {'ver':'3.14' },
       'MACS': {'ver':'2.2.7.1' },
       'MEME':{'ver':'5.4.1' }

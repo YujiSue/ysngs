@@ -57,6 +57,7 @@ class installer :
     proc = subprocess.run('unzip fastqc_v'+self.cfg.SOFTWARE_INFO['fastQC']['ver']+'.zip', stdout=PIPE, stderr=PIPE, text=True, shell=True)
     proc = subprocess.run('mv FastQC '+self.cfg.APPS_DIR, stdout=PIPE, stderr=PIPE, text=True, shell=True)
     proc = subprocess.run('chmod a+x '+os.path.join(self.cfg.APPS_DIR, 'FastQC', 'fastqc'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    proc = subprocess.run('rm fastqc_v'+self.cfg.SOFTWARE_INFO['fastQC']['ver']+'.zip', stdout=PIPE, stderr=PIPE, text=True, shell=True)
     print('Completed.')
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'FastQC'))
     os.chdir(self.cfg.WORK_SPACE)
@@ -445,12 +446,37 @@ class installer :
     print('Completed.')
     print('> ', proc.stderr.splitlines()[0])
 
+  def checkRSEM(self):
+    proc = subprocess.run('which rsem-calculate-expression', stdout=PIPE, stderr=PIPE, text=True, shell=True)
+    if proc.returncode == 0 and proc.stdout:
+      return os.path.exists(proc.stdout.splitlines()[0])
+
   def installRSEM(self):
     print('Install RSEM ...')
-    #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-    #if proc.returncode == 0 and proc.stdout:
-    #  print('> ',proc.stdout.splitlines()[-1])
-  
+    os.chdir(self.cfg.TEMPORAL)
+    print('  Downloads sources ...') 
+    proc = subprocess.run('wget https://github.com/deweylab/RSEM/archive/v' + \
+      self.cfg.SOFTWARE_INFO['RSEM']['ver']+'.tar.gz', stdout=PIPE, stderr=PIPE, shell=True)
+    if proc.returncode == 0:
+      print('  Completed.') 
+    else:
+      print('  Failed.')
+      return
+    proc = subprocess.run('tar zxf ./v' + self.cfg.SOFTWARE_INFO['RSEM']['ver']+'.tar.gz', shell=True)
+    if proc.returncode == 0:
+      print('  Source files expanded.') 
+    else:
+      print('  Failed to expand sources')
+      return
+    os.chdir('./RSEM-'+self.cfg.SOFTWARE_INFO['RSEM']['ver'])
+    proc = subprocess.run('make -j8', shell=True)
+    proc = subprocess.run('make install', shell=True)
+    proc = subprocess.run('rm ' + self.cfg.SOFTWARE_INFO['RSEM']['ver']+'.tar.gz', shell=True)
+    proc = subprocess.run('rm -r RSEM*', shell=True)
+    print('Completed.')
+    proc = subprocess.run('rsem-calculate-expression --version', shell=True, stdout=PIPE, stderr=PIPE, text=True)
+    print('> ', proc.stdout.splitlines()[0])
+
   def installBM(self):
     os.system('curl --output ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
     proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(self.cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
@@ -583,7 +609,7 @@ class installer :
       if not hasTVC:
         self.installTVC()
     elif exe == 'HTS':
-      hasHTS = self.checkCuff()
+      hasHTS = self.CheckHTSeq()
       print('Check HTSeq ...', 'Installed.' if hasHTS else 'Not installed.')
       if not hasHTS:
          self.installHTSeq()
@@ -592,6 +618,11 @@ class installer :
       print('Check Cufflinks ...', 'Installed.' if hasCuff else 'Not installed.')
       if not hasCuff:
          self.installCuff()
+    elif exe == 'RSEM':
+      hasRSEM = self.checkRSEM()
+      print('Check RSEM ...', 'Installed.' if hasRSEM else 'Not installed.')
+      if not hasRSEM:
+         self.installRSEM()
     elif exe == 'BiocManager':
       self.installBM()
     elif exe == 'MACS':
