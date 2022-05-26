@@ -188,7 +188,7 @@ class apprun:
     if 'annotate' in option and option['annotate'] and os.path.exists(option['annotation']):
       cmd += ' --sjdbGTFfile ' + option['annotation']
     if option['thread']:
-      cmd += ' --runThreadN ' + option['thread']
+      cmd += ' --runThreadN ' + str(option['thread'])
     return self.execCmd(cmd)
 
   def runSTAR(self, seqtype='single', input=[], ref='', output='', \
@@ -202,12 +202,14 @@ class apprun:
         return
     if not self.hasSTARRefIndex(os.path.join(self.cfg.REFERENCE_DIR, ref)):
       self.makeSTARRefIndex(refpath = option['refpath'], refname = ref, option = option)
-    cmd = 'STAR --runMode genomeGenerate' + \
-      ' --genomeDir ' + self.cfg.REFERENCE_DIR + ' --genomeFastaFiles ' + ref
-    if 'annotate' in option and option['annotate'] and os.path.exists(option['annotation']):
-      cmd += ' --sjdbGTFfile ' + option['annotation']
+    cmd = 'STAR --outSAMtype BAM SortedByCoordinate' + \
+      ' --genomeDir ' + os.path.join(self.cfg.REFERENCE_DIR, ref)
+    cmd += ' --readFilesIn'
+    for f in input:
+      cmd += ' ' + f 
     if option['thread']:
-      cmd += ' --runThreadN ' + option['thread']
+      cmd += ' --runThreadN ' + str(option['thread'])
+    cmd += ' --outFileNamePrefix ' + output
     return self.execCmd(cmd)
 
   def runSamtool2Fq(self, seqtype='single', input='', outdir='', outname = ''):
@@ -355,7 +357,7 @@ class apprun:
       ' -O ' + output + '.vcf.gz'
     return self.execCmd(cmd)
     
-  def runGATKVRecal(self, input = '', output = '', ref = '', resource = [], option={}):
+  def runGATKVRecal(self, input = '', output = '', ref = '', resources = [], option={}):
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'gatk'))
     os.chdir(self.cfg.WORK_SPACE)
     gatkcmd = 'gatk'
@@ -365,19 +367,49 @@ class apprun:
     cmd += ' -R ' + ref + \
     ' -V ' + input + \
     ' -O ' + output + '_snp.recal'
-
-    cmd += ' -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -mode SNP'
+    for resource in resources:
+      cmd += ' --resource ' + resource
+    cmd += ' -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -mode SNP'
     cmd += ' --tranches-file ' + output + '_snp.tranches'
     res = self.execCmd(cmd)
     if not res:
-      print(' Variant recalibration has failed.')
+      print(' Variant(SNP) recalibration has failed.')
       return
     cmd = gatkcmd + ' ApplyVQSR'
     cmd += ' -V ' + input
     cmd += ' --recal-file ' + output + '_snp.recal'
     cmd += ' --tranches-file ' + output + '_snp.tranches'
     cmd += ' -O ' + output + '_snp.vcf'
-    cmd += ' -mode SNP --create-output-variant-index true'
+    cmd += ' -mode SNP -truth-sensitivity-filter-leve 99.5 --create-output-variant-index true'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(SNP) recalibration apply has failed.')
+      return
+    cmd = gatkcmd + ' VariantRecalibrator'
+    cmd += ' -R ' + ref + \
+    ' -V ' + input + \
+    ' -O ' + output + '_indel.recal'
+    for resource in resources:
+      cmd += ' --resource ' + resource
+    cmd += ' -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR  -mode INDEL'
+    cmd += ' --tranches-file ' + output + '_indel.tranches'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(InDel) recalibration has failed.')
+      return
+    cmd = gatkcmd + ' ApplyVQSR'
+    cmd += ' -V ' + input
+    cmd += ' --recal-file ' + output + '_indel.recal'
+    cmd += ' --tranches-file ' + output + '_indel.tranches'
+    cmd += ' -O ' + output + '_indel.vcf'
+    cmd += ' -mode INDEL -truth-sensitivity-filter-leve 99.0 --create-output-variant-index true'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(InDel) recalibration apply has failed.')
+      return
+    cmd = gatkcmd + 'GatherVcfs -R ' + ref
+    cmd += ' ' + output + '_indel.vcf ' + output + '_snp.vcf'
+    cmd += ' -O ' + output + '_recal.vcf'
     return self.execCmd(cmd)
     
   def runGDVCall(self, input = '', output = '', ref = '', \
@@ -417,7 +449,7 @@ class apprun:
       cmd += ' -a ' + str(option['qual'])
     if 'thread' in option:
       cmd += ' -n ' + str(option['thread'])
-    cmd + input + ' ' + annotation + ' > ' + output
+    cmd += ' ' + input + ' ' + annotation + ' > ' + output
     return self.execCmd(cmd)
 
   def runCufflinks(self, input = '', annotation = '', output = '', option = {}):
@@ -436,7 +468,7 @@ class apprun:
     if 'mask' in option and os.path.exists(option['mask']):
       cmd += ' -M ' + option['mask']
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     cmd += ' -o ' + output + ' ' + input
     return self.execCmd(cmd)
   
@@ -454,7 +486,7 @@ class apprun:
     if 'mincount' in option:
       cmd += ' -c ' + str(option['mincount'])
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     if 'control' in option and option['control']:
       cmd += ' -g ' + option['control']
     cmd += ' -u -b ' + reference + ' -o ' + output
@@ -474,7 +506,7 @@ class apprun:
     os.chdir(self.cfg.WORK_SPACE)
     cmd = 'cuffmerge --no-update-check'
     if 'thread' in option:
-      cmd += ' -p ' + option['thread']
+      cmd += ' -p ' + str(option['thread'])
     cmd += ' -s ' + reference + ' ' + input
     return self.execCmd(cmd)
 
@@ -503,6 +535,6 @@ class apprun:
     cmd += ' --outdir ' + self.cfg.OUT_DIR + ' -n ' + output
     return self.execCmd(cmd)
 
-#def run
+#def runMeme():
 
 
