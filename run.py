@@ -215,7 +215,7 @@ class apprun:
   def runSamtool2Fq(self, seqtype='single', input='', outdir='', outname = ''):
     os.chdir(self.cfg.WORK_SPACE)
     if seqtype == 'single':
-      cmd = 'samtools fastq -0 /dev/null ' + input + ' > ' + os.path.join(outdir, outname + '.fq')
+      cmd = 'samtools fastq ' + input + ' > ' + os.path.join(outdir, outname + '.fq')
     else:
       cmd = 'samtools collate -u -O ' + input + ' | samtools fastq '
       cmd += ' -1 ' + os.path.join(outdir, outname + '_1.fq')
