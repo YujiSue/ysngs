@@ -1,2 +1,2 @@
-requireNamespace("BiocManager")
+require("BiocManager")
 BiocManager::install(c("edgeR"))
