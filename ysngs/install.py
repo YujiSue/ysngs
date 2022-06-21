@@ -404,6 +404,41 @@ class installer :
         print('> ', line)
         break
   
+  def checkHISAT2(self):
+    return os.path.exists(self.cfg.APPS_DIR+'/hisat2')
+
+  def installHISAT2(self):
+    print('Install HISAT2 ...')
+    os.chdir(self.cfg.TEMPORAL)
+    print('  Downloads sources ...') 
+    proc = subprocess.run('curl -o hisat2.zip https://cloud.biohpc.swmed.edu/index.php/s/oTtGWbWjaxsQ2Ho/download', stdout=PIPE, stderr=PIPE, shell=True)
+    if proc.returncode == 0 and os.path.exists(self.cfg.TEMPORAL+'/hisat2.zip'):
+      print('  Completed.') 
+    else:
+      print('  Failed.')
+      return
+    proc = subprocess.run('unzip hisat2.zip', shell=True)
+    if proc.returncode == 0:
+      print('  Exec files expanded.') 
+    else:
+      print('  Failed to expand files')
+      return
+    proc = subprocess.run('mv hisat2-'+self.cfg.SOFTWARE_INFO['HISAT']['ver'] + ' ' + self.cfg.APPS_DIR+'/hisat2', shell=True)
+    if proc.returncode == 0:
+      print('  Install completed.') 
+    else:
+      print('  Install failed.')
+      return
+    common.addPath(self.cfg.APPS_DIR+'/hisat2')
+    os.chdir(self.cfg.WORK_SPACE)
+    proc = subprocess.run('hisat2', shell=True, stdout=PIPE, stderr=PIPE, text=True)
+    print('Completed.')
+    lines = proc.stdout.splitlines()
+    for line in lines:
+      if ("HISAT2 version" in line) :
+        print('> ', line)
+        break
+
   def CheckHTSeq(self):
     proc = subprocess.run('which htseq-count', stdout=PIPE, stderr=PIPE, text=True, shell=True)
     if proc.returncode == 0 and proc.stdout:
@@ -470,7 +505,8 @@ class installer :
       return
     os.chdir('./RSEM-'+self.cfg.SOFTWARE_INFO['RSEM']['ver'])
     proc = subprocess.run('make -j8', shell=True)
-    proc = subprocess.run('make install', shell=True)
+    proc = subprocess.run('sudo make install', shell=True)
+    os.chdir(self.cfg.TEMPORAL)
     proc = subprocess.run('rm ' + self.cfg.SOFTWARE_INFO['RSEM']['ver']+'.tar.gz', shell=True)
     proc = subprocess.run('rm -r RSEM*', shell=True)
     print('Completed.')
@@ -603,6 +639,11 @@ class installer :
       print('Check STAR ...', 'Installed.' if hasSTAR else 'Not installed.')
       if not hasSTAR:
         self.installSTAR()
+    elif exe == 'HISAT':
+      hasHISAT = self.checkHISAT2()
+      print('Check HISAT ...', 'Installed.' if hasHISAT else 'Not installed.')
+      if not hasHISAT:
+        self.installHISAT2()
     elif exe == 'TVC':
       hasTVC = self.checkTVC()
       print('Check TVC ...', 'Installed.' if hasTVC else 'Not installed.')

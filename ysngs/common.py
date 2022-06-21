@@ -19,6 +19,7 @@ class config :
       'GDV' : {'ver':'1.3.0'},
       'Bowtie2': {'ver':'2.4.4' },
       'STAR': {'ver':'2.7.9a' },
+      'HISAT': {'ver':'2.2.1' },
       'Cuff': {'ver':'2.2.1' },
       'HTSeq': {'ver':'1.99.2' },
       'RSEM': {'ver':'1.3.3' },

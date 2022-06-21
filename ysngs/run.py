@@ -215,7 +215,7 @@ class apprun:
   def runSamtool2Fq(self, seqtype='single', input='', outdir='', outname = ''):
     os.chdir(self.cfg.WORK_SPACE)
     if seqtype == 'single':
-      cmd = 'samtools fastq -0 /dev/null ' + input + ' > ' + os.path.join(outdir, outname + '.fq')
+      cmd = 'samtools fastq ' + input + ' > ' + os.path.join(outdir, outname + '.fq')
     else:
       cmd = 'samtools collate -u -O ' + input + ' | samtools fastq '
       cmd += ' -1 ' + os.path.join(outdir, outname + '_1.fq')
@@ -357,7 +357,7 @@ class apprun:
       ' -O ' + output + '.vcf.gz'
     return self.execCmd(cmd)
     
-  def runGATKVRecal(self, input = '', output = '', ref = '', resource = [], option={}):
+  def runGATKVRecal(self, input = '', output = '', ref = '', resources = [], option={}):
     common.addPath(os.path.join(self.cfg.APPS_DIR, 'gatk'))
     os.chdir(self.cfg.WORK_SPACE)
     gatkcmd = 'gatk'
@@ -367,19 +367,49 @@ class apprun:
     cmd += ' -R ' + ref + \
     ' -V ' + input + \
     ' -O ' + output + '_snp.recal'
-
-    cmd += ' -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -mode SNP'
+    for resource in resources:
+      cmd += ' --resource ' + resource
+    cmd += ' -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -mode SNP'
     cmd += ' --tranches-file ' + output + '_snp.tranches'
     res = self.execCmd(cmd)
     if not res:
-      print(' Variant recalibration has failed.')
+      print(' Variant(SNP) recalibration has failed.')
       return
     cmd = gatkcmd + ' ApplyVQSR'
     cmd += ' -V ' + input
     cmd += ' --recal-file ' + output + '_snp.recal'
     cmd += ' --tranches-file ' + output + '_snp.tranches'
     cmd += ' -O ' + output + '_snp.vcf'
-    cmd += ' -mode SNP --create-output-variant-index true'
+    cmd += ' -mode SNP -truth-sensitivity-filter-leve 99.5 --create-output-variant-index true'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(SNP) recalibration apply has failed.')
+      return
+    cmd = gatkcmd + ' VariantRecalibrator'
+    cmd += ' -R ' + ref + \
+    ' -V ' + input + \
+    ' -O ' + output + '_indel.recal'
+    for resource in resources:
+      cmd += ' --resource ' + resource
+    cmd += ' -tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0 -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR  -mode INDEL'
+    cmd += ' --tranches-file ' + output + '_indel.tranches'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(InDel) recalibration has failed.')
+      return
+    cmd = gatkcmd + ' ApplyVQSR'
+    cmd += ' -V ' + input
+    cmd += ' --recal-file ' + output + '_indel.recal'
+    cmd += ' --tranches-file ' + output + '_indel.tranches'
+    cmd += ' -O ' + output + '_indel.vcf'
+    cmd += ' -mode INDEL -truth-sensitivity-filter-leve 99.0 --create-output-variant-index true'
+    res = self.execCmd(cmd)
+    if not res:
+      print(' Variant(InDel) recalibration apply has failed.')
+      return
+    cmd = gatkcmd + 'GatherVcfs -R ' + ref
+    cmd += ' ' + output + '_indel.vcf ' + output + '_snp.vcf'
+    cmd += ' -O ' + output + '_recal.vcf'
     return self.execCmd(cmd)
     
   def runGDVCall(self, input = '', output = '', ref = '', \
@@ -505,6 +535,6 @@ class apprun:
     cmd += ' --outdir ' + self.cfg.OUT_DIR + ' -n ' + output
     return self.execCmd(cmd)
 
-#def run
+#def runMeme():
 
 
