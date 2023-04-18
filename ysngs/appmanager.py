@@ -4,7 +4,7 @@ APP_LIST = {
   'igv': { 'name': 'IGV', 'ver': '2.13.2', 'checker': installer.checkIGV, 'verchecker': installer.checkVerIGV, 'installer': installer.installIGV },
   'sra': { 'name': 'SRA-toolkit', 'ver': '2.11.3', 'checker': installer.checkSRA, 'verchecker': installer.checkVerSRA, 'installer': installer.installSRA },
   #'root': { 'name': 'CERN ROOT', 'ver': '6.28.02', 'checker': installer.checkROOT, 'verchecker': installer.checkVerROOT, 'installer': installer.installROOT },
-  'blast': {},
+  #'blast': {},
   'samtools': { 'name': 'SAMTools', 'ver': '1.16', 'checker': installer.checkSamtools, 'verchecker': installer.checkVerSamtools, 'installer': installer.installSamtools },
   'bcftools': { 'name': 'BCFTools', 'ver': '1.16', 'checker': installer.checkBCFtools, 'verchecker': installer.checkVerBCFtools, 'installer': installer.installBCFtools },
   'htslib': { 'name': 'HTSlib', 'ver': '1.16', 'checker': installer.checkHTSlib, 'verchecker': installer.checkVerHTSlib, 'installer': installer.installHTSlib },
