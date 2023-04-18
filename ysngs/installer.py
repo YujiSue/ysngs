@@ -477,7 +477,7 @@ def installDELLY(cfg, ver):
   os.chdir(cfg.APPS_DIR)
   assert common.execCmd('git clone --recursive https://github.com/dellytools/delly.git')[0], 'Download error.'
   os.chdir('./delly')
-  assert common.execCmd('make all -j8')[0], 'Compile error.'
+  assert common.execCmd('sudo make all -j8')[0], 'Compile error.'
   os.chdir(cfg.WORK_SPACE)
   print('Completed.')
   print('>ver.', checkVerDELLY(cfg))
@@ -500,7 +500,7 @@ def installLUMPY(cfg, ver):
   assert common.execCmd('git clone --recursive https://github.com/arq5x/lumpy-sv.git')[0], 'Download error.'
   os.chdir(os.path.join(cfg.TEMPORAL, 'lumpy-sv'))
   assert common.execCmd('make -j8', verbose=True)[0], 'Make error.'
-  assert common.execCmd('cp bin/* /usr/local/bin/')[0]
+  assert common.execCmd('sudo cp bin/* /usr/local/bin/')[0]
   os.chdir(cfg.TEMPORAL)
   assert common.execCmd('rm -r lumpy-sv')[0]
   os.chdir(cfg.WORK_SPACE)
