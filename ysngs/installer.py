@@ -477,7 +477,7 @@ def installDELLY(cfg, ver):
   os.chdir(cfg.APPS_DIR)
   assert common.execCmd('git clone --recursive https://github.com/dellytools/delly.git')[0], 'Download error.'
   os.chdir('./delly')
-  assert common.execCmd('make all -j8')[0], 'Download error.'
+  assert common.execCmd('make all -j8')[0], 'Compile error.'
   os.chdir(cfg.WORK_SPACE)
   print('Completed.')
   print('>ver.', checkVerDELLY(cfg))
