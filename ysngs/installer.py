@@ -682,7 +682,7 @@ def checkVerBM(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'), output = None, args = [])
-  return ret.split(' ')[-1][1:-1]
+  return ret[1].split(' ')[-1][1:-1]
 def installBM(cfg, ver):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'))

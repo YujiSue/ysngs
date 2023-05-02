@@ -14,7 +14,7 @@ def runScript(script, output = None, args = []):
     cmd += ' > ' + output
   return execCmd(cmd, showcmd=True, verbose=False)
 
-def runRScript(script, output = None, args = []):
+def runRScript(script, output = None, args = [], showcmd = False):
   cmd = 'R --no-save --slave --vanilla'
   if len(args):
     cmd += ' --args'
@@ -23,7 +23,8 @@ def runRScript(script, output = None, args = []):
   cmd += ' < ' + script
   if output and os.path.exists(output):
     cmd += ' > ' + output
-  print('Run: >', cmd)
+  if showcmd:
+    print('Run: >', cmd)
   proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
   return [proc.returncode, proc.stdout, proc.stderr]
 
