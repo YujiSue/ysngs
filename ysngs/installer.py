@@ -477,7 +477,7 @@ def installDELLY(cfg, ver):
   os.chdir(cfg.APPS_DIR)
   assert common.execCmd('git clone --recursive https://github.com/dellytools/delly.git')[0], 'Download error.'
   os.chdir('./delly')
-  assert common.execCmd('sudo make all -j8')[0], 'Compile error.'
+  assert common.execCmd('make all -j8')[0], 'Compile error.'
   os.chdir(cfg.WORK_SPACE)
   print('Completed.')
   print('>ver.', checkVerDELLY(cfg))
@@ -671,14 +671,31 @@ def installRSEM(cfg, ver):
 
 # BiocManager (R)
 def checkBM(cfg):
-  proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  if proc.returncode == 0:
-    return 'FALSE' not in proc.stdout
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'), output = None, args = [])
+  return ret[0] and 'FALSE' not in ret[1]
+  #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+  #if proc.returncode == 0:
+  #  return 'FALSE' not in proc.stdout
+def checkVerBM(cfg):
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'), output = None, args = [])
+  return ret.split(' ')[-1][1:-1]
 def installBM(cfg, ver):
-  os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
-  proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  if proc.returncode == 0 and proc.stdout:
-    print('> ',proc.stdout.splitlines()[-1])
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'))
+  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'), output = None, args = [])
+  #os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
+  #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
+  #if proc.returncode == 0 and proc.stdout:
+  #  print('> ',proc.stdout.splitlines()[-1])
+  print('Completed.')
+  print('>ver.', checkVerBM(cfg))
+
+
+
 # EdgeR (R)
 def installEdgeR(cfg):
   os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installEdgeR.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installEdgeR.R')
@@ -709,7 +726,7 @@ def installMACS(cfg, ver):
   assert common.execCmd('wget https://github.com/macs3-project/MACS/archive/refs/tags/'+ver+'.tar.gz', verbose=True)[0], 'Download error.'
   assert common.execCmd('tar -xvzf '+ver+'.tar.gz', verbose=True)[0], 'Expansion error.'
   os.chdir(os.path.join(cfg.TEMPORAL,'MACS-'+ver[1:]))
-  assert common.execCmd("sed -i 's/install_requires = \[f\"numpy>={numpy_requires}\",\]/install_requires = \[f\"numpy{numpy_requires}\",\]/' ./setup.py", verbose=True)[0]
+  assert common.execCmd("sed -i \"s/numpy_requires = '>=1.17'/numpy_requires = '==1.22.4'/\" ./setup.py", verbose=True)[0]
   assert common.execCmd("pip install -e .", verbose=True)[0]
   os.chdir(cfg.TEMPORAL)
   assert common.execCmd('rm '+ver+'.tar.gz', verbose=True)[0]
