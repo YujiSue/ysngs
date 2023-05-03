@@ -3,8 +3,6 @@ from ysngs import installer
 APP_LIST = {
   'igv': { 'name': 'IGV', 'ver': '2.13.2', 'checker': installer.checkIGV, 'verchecker': installer.checkVerIGV, 'installer': installer.installIGV },
   'sra': { 'name': 'SRA-toolkit', 'ver': '2.11.3', 'checker': installer.checkSRA, 'verchecker': installer.checkVerSRA, 'installer': installer.installSRA },
-  #'root': { 'name': 'CERN ROOT', 'ver': '6.28.02', 'checker': installer.checkROOT, 'verchecker': installer.checkVerROOT, 'installer': installer.installROOT },
-  #'blast': {},
   'samtools': { 'name': 'SAMTools', 'ver': '1.16', 'checker': installer.checkSamtools, 'verchecker': installer.checkVerSamtools, 'installer': installer.installSamtools },
   'bcftools': { 'name': 'BCFTools', 'ver': '1.16', 'checker': installer.checkBCFtools, 'verchecker': installer.checkVerBCFtools, 'installer': installer.installBCFtools },
   'htslib': { 'name': 'HTSlib', 'ver': '1.16', 'checker': installer.checkHTSlib, 'verchecker': installer.checkVerHTSlib, 'installer': installer.installHTSlib },
@@ -32,11 +30,15 @@ APP_LIST = {
   'fcount': { 'name': 'featureCounts', 'ver':'latest', 'checker': installer.checkFeatCounts, 'verchecker': installer.checkVerFeatCounts, 'installer': installer.installFeatCounts },
   'cufflink': { 'name': 'Cufflinks', 'ver': '2.2.1', 'checker': installer.checkCuff, 'verchecker': installer.checkVerCuff, 'installer': installer.installCuff },
   'rsem': { 'name': 'RSEM', 'ver': '1.3.3', 'checker': installer.checkRSEM, 'verchecker': installer.checkVerRSEM, 'installer': installer.installRSEM },
-  'r-bioc': { 'name': 'BiocManager', 'ver': 'latest', 'checker': installer.checkBM, 'installer': installer.installBM },
+  'r-bioc': { 'name': 'BiocManager', 'ver': 'latest', 'checker': installer.checkBM, 'verchecker': installer.checkVerBM, 'installer': installer.installBM },
+  'edger': { 'name': 'EdgeR', 'ver': 'latest', 'checker': installer.checkEdgeR, 'verchecker': installer.checkVerEdgeR, 'installer': installer.installEdgeR },
   
+  'cummer': { 'name': 'CummeRbund', 'ver': 'latest', 'checker': installer.checkCumme, 'verchecker': installer.checkVerCumme, 'installer': installer.installCumme },
   'macs2': { 'name': 'MACS2', 'ver':'v2.2.7.1', 'checker': installer.checkMACS, 'verchecker': installer.checkVerMACS, 'installer': installer.installMACS },
   
-  'meme': { 'name': 'MEME', 'ver':'5.4.1', 'checker': installer.checkMEME, 'verchecker': installer.checkVerMEME, 'installer': installer.installMEME }
+  'meme': { 'name': 'MEME', 'ver':'5.4.1', 'checker': installer.checkMEME, 'verchecker': installer.checkVerMEME, 'installer': installer.installMEME },
+
+  'sutoku': {'name': 'Sutoku', 'ver':'latest' }
 }
 
 class AppManager:

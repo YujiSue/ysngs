@@ -675,39 +675,56 @@ def checkBM(cfg):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'), output = None, args = [])
   return ret[0] and 'FALSE' not in ret[1]
-  #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  #if proc.returncode == 0:
-  #  return 'FALSE' not in proc.stdout
 def checkVerBM(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
-    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/check BiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'), output = None, args = [])
   return ret[1].split(' ')[-1][1:-1]
 def installBM(cfg, ver):
+  print('Install BiocManager(R) ...')
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'))
   assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'), output = None, args = [])
-  #os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R')
-  #proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  #if proc.returncode == 0 and proc.stdout:
-  #  print('> ',proc.stdout.splitlines()[-1])
   print('Completed.')
   print('>ver.', checkVerBM(cfg))
 
-
-
 # EdgeR (R)
+def checkEdgeR(cfg):
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None, args = [])
+  return ret[0] and 'TRUE' in ret[1]
+def checkVerEdgeR(cfg):
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None, args = [])
+  return ret[1].split(' ')[-1][1:-1]
 def installEdgeR(cfg):
-  os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installEdgeR.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installEdgeR.R')
-  proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'installEdgeR.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  if proc.returncode == 0 and proc.stdout:
-    print('> ',proc.stdout.splitlines()[-1])
+  print('Install EdgeR (R) ...')
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
+  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'), args=['edgeR'], output = None, args = [])
+  print('Completed.')
+  print('>ver.', checkVerEdgeR(cfg))
+
 # CummeRbund (R)
+def checkCumme(cfg):
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None, args = [])
+  return ret[0] and 'TRUE' in ret[1]
+def checkVerCumme(cfg):
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['cummeRbund'], output = None, args = [])
+  return ret[1].split(' ')[-1][1:-1]
 def installCumme(cfg):
-  os.system('curl --output ' + os.path.join(cfg.SCRIPT_DIR, 'installcummeR.R') + ' https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installcummeR.R')
-  proc = subprocess.run('R --no-save --slave --vanilla < ' + os.path.join(cfg.SCRIPT_DIR, 'installcummeR.R'), stdout=PIPE, stderr=PIPE, text=True, shell=True)
-  if proc.returncode == 0 and proc.stdout:
-    print('> ',proc.stdout.splitlines()[-1])
+  print('Install CummeRbund (R) ...')
+  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
+  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'), args=['cummeRbund', 'ggplot2', 'RSQLite'], output = None)
+  print('Completed.')
+  print('>ver.', checkVerCumme(cfg))
 
 # MACS2
 def checkMACS(cfg):
