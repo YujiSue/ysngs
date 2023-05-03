@@ -692,18 +692,18 @@ def installBM(cfg, ver):
 def checkEdgeR(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None, args = [])
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerEdgeR(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None, args = [])
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].split(' ')[-1][1:-1]
 def installEdgeR(cfg):
   print('Install EdgeR (R) ...')
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
-  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'), args=['edgeR'], output = None, args = [])
+  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'), args=['edgeR'], output = None)
   print('Completed.')
   print('>ver.', checkVerEdgeR(cfg))
 
@@ -711,12 +711,12 @@ def installEdgeR(cfg):
 def checkCumme(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None, args = [])
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['cummeRbund'], output = ModuleNotFoundError)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerCumme(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['cummeRbund'], output = None, args = [])
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['cummeRbund'], output = None)
   return ret[1].split(' ')[-1][1:-1]
 def installCumme(cfg):
   print('Install CummeRbund (R) ...')
