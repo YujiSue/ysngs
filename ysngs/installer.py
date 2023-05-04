@@ -677,7 +677,7 @@ def checkBM(cfg):
   return ret[0] and 'FALSE' not in ret[1]
 def checkVerBM(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
-    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/check BiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
+    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'), output = None, args = [])
   return ret[1].strip().split(' ')[-1][1:-1]
 def installBM(cfg, ver):
@@ -699,7 +699,7 @@ def checkVerEdgeR(cfg):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
-def installEdgeR(cfg):
+def installEdgeR(cfg, ver):
   print('Install EdgeR (R) ...')
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
@@ -718,7 +718,7 @@ def checkVerCumme(cfg):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['cummeRbund'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
-def installCumme(cfg):
+def installCumme(cfg, ver):
   print('Install CummeRbund (R) ...')
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
