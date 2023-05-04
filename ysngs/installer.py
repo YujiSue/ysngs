@@ -711,7 +711,7 @@ def installEdgeR(cfg):
 def checkCumme(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
     common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['cummeRbund'], output = ModuleNotFoundError)
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['cummeRbund'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerCumme(cfg):
   if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
