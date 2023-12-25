@@ -239,6 +239,7 @@ def installBWA(cfg, ver):
   assert common.execCmd('wget https://jaist.dl.sourceforge.net/project/bio-bwa/bwa-' + ver+'.tar.bz2')[0], 'Download error.'
   assert common.execCmd('tar xvf ./bwa-' + ver +'.tar.bz2')[0], 'Expansion error.'
   os.chdir(os.path.join(cfg.TEMPORAL, 'bwa-' + ver))
+  assert common.wxecCmd("sed -i 's/const uint8_t rle_auxtab/extern const uint8_t rle_auxtab/g' rle.h")
   assert common.execCmd('make -j8', verbose=True)[0], 'Make error.'
   assert common.execCmd('cp bwa ' + cfg.APPS_DIR)[0], 'File copy error.'
   assert common.execCmd('rm -r ' + os.path.join(cfg.TEMPORAL, 'bwa*'))[0]
