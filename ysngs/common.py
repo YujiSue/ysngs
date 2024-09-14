@@ -15,9 +15,30 @@ def setEnv(key,val):
 def addPath(path):
   addEnv('PATH', path)
 
-def curlDownload(url, output=None, showcmd=False, verbose=False):
-  outopt = f" -o '{output}'" if output else "O"
-  cmd = f"curl -L{outopt} '{url}'"
+def curlDownload(url, output=None, expand=False, tmp=None, showcmd=False, verbose=False):
+  cmd = ''
+  dir = os.getcwd()
+  if expand:
+    if tmp:
+      os.chdir(tmp)
+    execCmd(f"curl -L -O '{url}'", showcmd=showcmd, verbose=verbose)
+    ext = os.path.splitext(url)[1]
+    file = os.path.split(url)[1]
+    if ext == '.zip':
+      cmd = f"unzip {file} {('-d ' + output) if output else ''}"
+    elif ext == '.gz':
+      if url.endswith('.tar.gz'):
+        cmd = f"tar -zvxf {file} {('-C ' + output) if output else ''}"
+      else:
+        if output:
+          cmd += f"gunzip -c {file} {('> ' + output) if output else ''}"
+  else:
+    cmd = f"curl -L {('-o ' + output) if output else '-O'} '{url}'"
+  os.chdir(dir)
+  return execCmd(cmd, showcmd=showcmd, verbose=verbose)
+
+def gitClone(url, showcmd=False, verbose=False):
+  cmd = f"git clone '{url}'"
   return execCmd(cmd, showcmd=showcmd, verbose=verbose)
 
 def execCmd(cmd, showcmd = True, verbose = False):
@@ -26,13 +47,23 @@ def execCmd(cmd, showcmd = True, verbose = False):
   proc = subprocess.Popen(cmd, shell=True, stderr=(subprocess.STDOUT if verbose==True else subprocess.PIPE), stdout=subprocess.PIPE, text=True)
   if verbose:
     while proc.poll() is None:
-      line = proc.stdout.readline().strip()
+      while True: 
+        line = proc.stdout.readline()
+        if line:
+          print(line, end='')
+        else:
+          break
+    while True: 
+      line = proc.stdout.readline()
       if line:
-        print(line)
+        print(line, end='')
+      else:
+        break
     return [proc.returncode==0, proc.stderr.strip() if proc.stderr else None, proc.stderr.strip() if proc.stderr else None]
   else:
     ret = proc.communicate()
     return [proc.returncode==0, ret[0].strip() if ret[0] else None, ret[1].strip() if ret[1] else None]
+
 
 def execFunc(module, name, *args, **kwargs):
     try:
