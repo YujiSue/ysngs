@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-
 setup(
     name='ysngs',
     version='0.2.1',
