@@ -15,27 +15,21 @@ def setEnv(key,val):
 def addPath(path):
   addEnv('PATH', path)
 
-def curlDownload(url, output=None, expand=False, tmp=None, showcmd=False, verbose=False):
-  cmd = ''
-  dir = os.getcwd()
+def curlDownload(url, output=None, expand=False, showcmd=False, verbose=False):
+  res = execCmd(f"curl -L {('-o ' + output) if output else '-O'} '{url}'")
   if expand:
-    if tmp:
-      os.chdir(tmp)
-    execCmd(f"curl -L -O '{url}'", showcmd=showcmd, verbose=verbose)
-    ext = os.path.splitext(url)[1]
-    file = os.path.split(url)[1]
+    ext = os.path.splitext(output if output else url)[1]
+    file = output if output else os.path.split(url)[1]
     if ext == '.zip':
-      cmd = f"unzip {file} {('-d ' + output) if output else ''}"
+      cmd = f"unzip {file}"
     elif ext == '.gz':
-      if url.endswith('.tar.gz'):
-        cmd = f"tar -zvxf {file} {('-C ' + output) if output else ''}"
+      if file.endswith('.tar.gz'):
+        cmd = f"tar -zvxf {file}"
       else:
-        if output:
-          cmd += f"gunzip -c {file} {('> ' + output) if output else ''}"
+        cmd += f"gunzip {file}"
+    return execCmd(cmd, showcmd=showcmd, verbose=verbose)
   else:
-    cmd = f"curl -L {('-o ' + output) if output else '-O'} '{url}'"
-  os.chdir(dir)
-  return execCmd(cmd, showcmd=showcmd, verbose=verbose)
+    return res
 
 def gitClone(url, showcmd=False, verbose=False):
   cmd = f"git clone '{url}'"
