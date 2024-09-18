@@ -26,7 +26,7 @@ def curlDownload(url, output=None, expand=False, showcmd=False, verbose=False):
       if file.endswith('.tar.gz'):
         cmd = f"tar -zvxf {file}"
       else:
-        cmd += f"gunzip {file}"
+        cmd = f"gunzip {file}"
     return execCmd(cmd, showcmd=showcmd, verbose=verbose)
   else:
     return res
