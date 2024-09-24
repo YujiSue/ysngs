@@ -24,12 +24,12 @@ def installMoirei(prop):
     print('> ver.', checkVerMoirei())
 
 # Sutoku
-def checkMoirei():
+def checkSutoku():
   return os.path.exists(os.path.join(os.environ['HYM_APP'], 'moirei'))
-def checkVerMoirei():
+def checkVerSutoku():
   res = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'moirei')} --version", showcmd=False)
   return res[1]
-def installMoirei(prop):
+def installSutoku(prop):
   if checkMoirei():
     print('moirei is installed.')
   else:
