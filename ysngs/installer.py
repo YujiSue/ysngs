@@ -5,9 +5,9 @@ from ysngs import common
 
 # Moirei
 def checkMoirei():
-  return os.path.exists(os.path.join(os.environ['HYM_APP'], 'moirei'))
+  return os.path.exists(os.path.join(os.environ['HYM_APP'], 'bin', 'moirei'))
 def checkVerMoirei():
-  res = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'moirei')} --version", showcmd=False)
+  res = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'bin', 'moirei')} --version", showcmd=False)
   return res[1]
 def installMoirei(prop):
   if checkMoirei():
