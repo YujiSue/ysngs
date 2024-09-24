@@ -17,9 +17,9 @@ def installMoirei(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.gitClone(prop['url'])
     os.chdir('Moirei')
-    assert common.execCmd(f"cmake -S . -B build", showcmd=False, verbose=True)[0], "Failed to cmake configure."
+    assert common.execCmd(f"cmake -DINSTALL_SLIB=ON -S . -B build", showcmd=False, verbose=True)[0], "Failed to cmake configure."
     assert common.execCmd(f"cmake --build build", showcmd=False, verbose=True)[0], "Failed to build."
-    assert common.execCmd(f"cp ./moirei {os.environ['HYM_APP']}", showcmd=False, verbose=True)[0]
+    assert common.execCmd(f"cmake --install build --prefix {os.environ['HYM_APP']}", showcmd=False, verbose=True)[0], "Failed to build."
     print('Completed.')
     print('> ver.', checkVerMoirei())
 
