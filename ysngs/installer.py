@@ -759,7 +759,7 @@ def checkVerBM():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBiocManagerVer.R')
   #if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
   #  common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
-  #ret = common.runRScript(scrpt, output = None, args = [])
+  ret = common.runRScript(scrpt, output = None, args = [])
   return ret[1].strip().split(' ')[-1][1:-1]
 def installBM(prop):
   print('Install BiocManager(R) ...')
@@ -771,25 +771,33 @@ def installBM(prop):
   print('Completed.')
   print('>ver.', checkVerBM())
 
+# DESeq2 (R)
+def checkDESeq():
+  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None)
+  return ret[0] and 'TRUE' in ret[1]
+def checkVerDESeq():
+  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
+  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
+  return ret[1].strip().split(' ')[-1][1:-1]
+def installDESeq(prop):
+  print('Install DESeq2 (R) ...')
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['DESeq2'], output = None)
+  print('Completed.')
+  print('>ver.', checkVerDESeq())
+
 # EdgeR (R)
 def checkEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-#  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R')):
-#    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
-#  if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R')):
-#    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkPkgVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'))
   ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
 def installEdgeR(prop):
   print('Install EdgeR (R) ...')
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
-  #if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R')):
-  #  common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBMPkg.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'))
-  assert common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'installBMPkg.R'), args=['edgeR'], output = None)
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['edgeR'], output = None)
   print('Completed.')
   print('>ver.', checkVerEdgeR())
 

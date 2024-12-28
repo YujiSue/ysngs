@@ -267,8 +267,15 @@
 		"verchecker": "checkVerBM", 
 		"installer": "installBM" 
 	},
+	"deseq2": {
+		"name": "DESeq2", 
+		"ver": "latest", 
+		"checker": "checkDESeq", 
+		"verchecker": "checkVerDESeq", 
+		"installer": "installDESeq" 
+	},
 	"edger": { 
-		"name": "EdgeR", 
+		"name": "edgeR", 
 		"ver": "latest", 
 		"checker": "checkEdgeR", 
 		"verchecker": "checkVerEdgeR", 
