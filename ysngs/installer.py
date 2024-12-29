@@ -774,11 +774,11 @@ def installBM(prop):
 # DESeq2 (R)
 def checkDESeq():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkBMPkg.R'), args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerDESeq():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
 def installDESeq(prop):
   print('Install DESeq2 (R) ...')
@@ -789,11 +789,11 @@ def installDESeq(prop):
 # EdgeR (R)
 def checkEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkBMPkg.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkBMPkg.R'), args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
-  ret = common.runRScript(os.path.join(cfg.SCRIPT_DIR, 'checkPkgVer.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
 def installEdgeR(prop):
   print('Install EdgeR (R) ...')
