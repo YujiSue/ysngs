@@ -774,7 +774,7 @@ def installBM(prop):
 # DESeq2 (R)
 def checkDESeq():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkBMPkg.R'), args=['DESeq2'], output = None)
+  ret = common.runRScript(scrpt, args=['DESeq2'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerDESeq():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
@@ -789,7 +789,7 @@ def installDESeq(prop):
 # EdgeR (R)
 def checkEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'checkBMPkg.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(scrpt, args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerEdgeR():
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkPkgVer.R')
@@ -838,20 +838,21 @@ def installRMouseGeneSet(prop):
 def installEA(prop):
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
   print('Install clusterProfiler (R) ...')
-  assert runRScript(scrpt, args=['clusterProfiler'], output = None)[0]
-  print('Install pathview (R) ...')
-  assert runRScript(scrpt, args=['pathview'], output = None)[0]
+  assert common.runRScript(scrpt, args=['clusterProfiler'], output = None)[0]
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['clusterProfiler'], output = None)
   print('Completed.')
-
+  print('>ver.', ret[1].strip()[1:-1])
+  print('Install pathview (R) ...')
+  assert common.runRScript(scrpt, args=['pathview'], output = None)[0]
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['pathview'], output = None)
+  print('Completed.')
+  print('>ver.', ret[1].strip()[1:-1])
+  
 # Graphics
 def installRChart(prop):
-  
-
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R')
-
   print('Install ggplot2, (R) ...')
-  assert common.runRScript(scrpt, args=['ggplot2', 'ggarchery'], output = None)[0]
-  
+  assert common.runRScript(scrpt, args=['ggplot2', 'ggarchery'], output = None)[0]  
   print('Completed.')
   
 
