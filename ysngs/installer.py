@@ -835,22 +835,25 @@ def installRMouseGeneSet(prop):
   assert common.runRScript(scrpt, args=['org.Mm.eg.db'], output = None)[0]
   print('Completed.')
 
-# Graphics
-def installRGraphics(prop):
+def installEA(prop):
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
-
   print('Install clusterProfiler (R) ...')
-  assert common.runRScript(scrpt, args=['clusterProfiler'], output = None)[0]
+  assert runRScript(scrpt, args=['clusterProfiler'], output = None)[0]
+  print('Install pathview (R) ...')
+  assert runRScript(scrpt, args=['pathview'], output = None)[0]
+  print('Completed.')
+
+# Graphics
+def installRChart(prop):
+  
+
+  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R')
 
   print('Install ggplot2, (R) ...')
-  assert common.runRScript(scrpt, args=['ggplot2', 'ggarchery', 'enrichplot', 'plotly'], output = None)[0]
-  
-  print('Install python plotly')
-  assert common.execCmd('pip install -q kaleido plotly', verbose = True)[0]
+  assert common.runRScript(scrpt, args=['ggplot2', 'ggarchery'], output = None)[0]
   
   print('Completed.')
-  print('>ver.', checkVerCumme())
-
+  
 
 # MACS2
 def checkMACS(cfg):

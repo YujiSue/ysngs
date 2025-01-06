@@ -1,7 +1,3 @@
-
-
-
-
 #
 exportImage <- function(plot,output,format="png",width=3,height=3,resolution=150) {
     ggsave(paste(output, format, sep = "."), plot, width=width,height=height,dpi=resolution)
