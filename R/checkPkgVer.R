@@ -1,2 +1,2 @@
 args <- commandArgs(trailingOnly=TRUE)
-packageVersion(args[1])
+print(packageVersion(args[1])[1])
