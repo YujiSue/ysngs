@@ -767,7 +767,7 @@ def checkDESeq():
   return ret[0] and 'TRUE' in ret[1]
 def checkVerDESeq():
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['DESeq2'], output = None)
-  return ret[1].strip()[1:-1]
+  return ret[1].strip().split(' ')[-1][1:-1]
 def installDESeq(prop):
   print('Install DESeq2 (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['DESeq2'], output = None)
@@ -811,7 +811,7 @@ def installCumme(prop):
 
 # Org DB
 def installRHumanGeneSet(prop):
-  print('Install clusterProfiler (R) ...')
+  print('Install human gene annotation DB (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Hs.eg.db'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Hs.eg.db'], output = None)
   print('Completed.')
@@ -819,7 +819,7 @@ def installRHumanGeneSet(prop):
 
 def installRMouseGeneSet(prop):
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
-  print('Install clusterProfiler (R) ...')
+  print('Install mouse gene annotation DB (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Mm.eg.db'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Mm.eg.db'], output = None)
   print('Completed.')

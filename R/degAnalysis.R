@@ -17,15 +17,13 @@ deseqAnalyze <- function(data, group, formula, method = 'auto', reduced = as.for
     return(dds)                 
 }
 
-deseqResult <- function(data, target, export_csv=T, export_obj=T, suffix='') {
+deseqResult <- function(data, target, export_csv=T, suffix='') {
     # Get result
     res <- results(data, contrast = target)
     # Make dir.
     parent = getwd()
-    dir.create(file.path(parent, 'Result'), showWarnings = FALSE)
-    setwd(file.path(parent, 'Result'))
-    # Save result object
-    if (export_obj) saveRDS(res, file = paste(suffix, "_DEG.obj", sep=""))
+    dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
+    setwd(file.path(parent, 'Result', 'DEG'))
     # Export data as CSV
     if (export_csv) write.csv(res, file = paste(suffix, "_DEG.csv", sep=""))
     setwd(parent)
@@ -48,12 +46,46 @@ countData <- function(data, restype = 'edgeR', normalized=T, export_csv=T, suffi
     if (export_csv) {
         # Make dir.
         parent = getwd()
-        dir.create(file.path(parent, 'Result', 'Count'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'Count'))
+        dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
+        setwd(file.path(parent, 'Result', 'DEG'))
         write.csv(counts, file = paste(suffix, "_counts.csv", sep=""))
         setwd(parent)
     }
     return(counts)
+}
+
+zScoreData <- function(counts, group, factors,
+                        collabel = NA,
+                        rowlabel = NA,
+                        cluster = T, 
+
+                        export_csv=T, suffix='') {
+    means <- list()
+    for (f in factors) {
+        means[[f]] <- rowMeans(counts[, group == f])
+    }
+    scores <- do.call(cbind, means)
+    scores <- scale(scores, center = TRUE, scale = TRUE)
+    #
+    if (collabel) colnames(scores) <- collabel
+    else colnames(scores) <- factors
+    if (rowlabel) rownames(scores) <- rowlabel
+    else rownames(scores) <- rownames(counts)
+    #
+    if (cluster) {
+        d <- dist(scores)
+        hc <- hclust(d)
+        scores <- scores[hc$order,]
+    }
+    if (export_csv) {
+        # Make dir.
+        parent = getwd()
+        dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
+        setwd(file.path(parent, 'Result', 'DEG'))
+        write.csv(scores, file = paste(suffix, "_scores.csv", sep=""))
+        setwd(parent)
+    }
+    return(scores)
 }
 
 expressionChanged <- function(result, 
@@ -253,8 +285,8 @@ heatMap <- function(counts, export_img = T, suffix = '') {
     return(plt)
 }
 
-vennPlot <- function(data, target, color = c("white", "turquoise"), export_img = T, suffix = '') {
-    plt = ggVennDiagram(x[1:3],label_alpha=0) + 
+vennPlot <- function(data, color = c("white", "turquoise"), export_img = T, suffix = '') {
+    plt = ggVennDiagram(data) + 
             scale_fill_gradient(low = color[1], high = color[2])
     #
     if (export_img) {
