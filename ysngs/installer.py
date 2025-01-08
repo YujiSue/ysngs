@@ -750,35 +750,23 @@ def installRSEM(prop):
 
 # BiocManager (R)
 def checkBM():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBiocManager.R')
-#  if not os.path.exists(scrpt):
-#    common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManager.R'))
-  ret = common.runRScript(scrpt, output = None, args = [])
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBiocManager.R'), output = None, args = [])
   return ret[0] and 'FALSE' not in ret[1]
 def checkVerBM():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBiocManagerVer.R')
-  #if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R')):
-  #  common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/checkBiocManagerVer.R', output = os.path.join(cfg.SCRIPT_DIR, 'checkBiocManagerVer.R'))
-  ret = common.runRScript(scrpt, output = None, args = [])
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBiocManagerVer.R'), output = None, args = [])
   return ret[1].strip().split(' ')[-1][1:-1]
 def installBM(prop):
   print('Install BiocManager(R) ...')
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBiocManager.R')
-  
-  #if not os.path.exists(os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R')):
-  #  common.download('https://raw.githubusercontent.com/YujiSue/ysngs/main/R/installBiocManager.R', output = os.path.join(cfg.SCRIPT_DIR, 'installBiocManager.R'))
-  assert common.runRScript(scrpt, output = None, args = [])[0]
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBiocManager.R'), output = None, args = [])[0]
   print('Completed.')
   print('>ver.', checkVerBM())
 
 # DESeq2 (R)
 def checkDESeq():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(scrpt, args=['DESeq2'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['DESeq2'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerDESeq():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R')
-  ret = common.runRScript(scrpt, args=['DESeq2'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['DESeq2'], output = None)
   return ret[1].strip()[1:-1]
 def installDESeq(prop):
   print('Install DESeq2 (R) ...')
@@ -788,12 +776,10 @@ def installDESeq(prop):
 
 # EdgeR (R)
 def checkEdgeR():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R')
-  ret = common.runRScript(scrpt, args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['edgeR'], output = None)
   return ret[0] and 'TRUE' in ret[1]
 def checkVerEdgeR():
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R')
-  ret = common.runRScript(scrpt, 'checkPkgVer.R'), args=['edgeR'], output = None)
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['edgeR'], output = None)
   return ret[1].strip().split(' ')[-1][1:-1]
 def installEdgeR(prop):
   print('Install EdgeR (R) ...')
@@ -840,23 +826,21 @@ def installRMouseGeneSet(prop):
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
 
 def installEA(prop):
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
   print('Install clusterProfiler (R) ...')
-  assert common.runRScript(scrpt, args=['clusterProfiler'], output = None)[0]
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['clusterProfiler'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['clusterProfiler'], output = None)
   print('Completed.')
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
   print('Install pathview (R) ...')
-  assert common.runRScript(scrpt, args=['pathview'], output = None)[0]
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['pathview'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['pathview'], output = None)
   print('Completed.')
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
   
 # Graphics
 def installRChart(prop):
-  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R')
   print('Install ggplot2, (R) ...')
-  assert common.runRScript(scrpt, args=['ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
   print('Completed.')
   
 
