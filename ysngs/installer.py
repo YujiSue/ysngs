@@ -811,6 +811,9 @@ def installCumme(prop):
 
 # Org DB
 def installRHumanGeneSet(prop):
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['AnnotationDbi'], output = None)
+  if not ret[0] or 'TRUE' not in ret[1]:
+    assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['AnnotationDbi'], output = None)[0]
   print('Install human gene annotation DB (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Hs.eg.db'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Hs.eg.db'], output = None)
@@ -818,6 +821,9 @@ def installRHumanGeneSet(prop):
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
 
 def installRMouseGeneSet(prop):
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['AnnotationDbi'], output = None)
+  if not ret[0] or 'TRUE' not in ret[1]:
+    assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['AnnotationDbi'], output = None)[0]
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
   print('Install mouse gene annotation DB (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Mm.eg.db'], output = None)[0]
@@ -839,7 +845,7 @@ def installEA(prop):
   
 # Graphics
 def installRChart(prop):
-  print('Install ggplot2, (R) ...')
+  print('Install tidyverse related libraries and  (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
   print('Completed.')
   

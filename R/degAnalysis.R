@@ -10,9 +10,10 @@ deseqAnalyze <- function(data, group, formula, method = 'auto', reduced = as.for
         dds <- DESeq(dds)
     }
     else if (method == 'lrt') {
-        dds <- estimateSizeFactors(dds)
-        dds <- estimateDispersions(dds)
-        dds <- nbinomLRT(dds, full = formula, reduced = reduced)
+        dds <- DESeq(dds, test = "LRT", reduced = reduced)
+        #dds <- estimateSizeFactors(dds)
+        #dds <- estimateDispersions(dds)
+        #dds <- nbinomLRT(dds, full = formula, reduced = reduced)
     }
     return(dds)                 
 }
@@ -20,13 +21,12 @@ deseqAnalyze <- function(data, group, formula, method = 'auto', reduced = as.for
 deseqResult <- function(data, target, export_csv=T, suffix='') {
     # Get result
     res <- results(data, contrast = target)
-    # Make dir.
-    parent = getwd()
-    dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
-    setwd(file.path(parent, 'Result', 'DEG'))
     # Export data as CSV
-    if (export_csv) write.csv(res, file = paste(suffix, "_DEG.csv", sep=""))
-    setwd(parent)
+    if (export_csv) {
+        path = "DEG_result.csv"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        write.csv(res, file = path)
+    }
     return(res)
 }
 
@@ -35,57 +35,57 @@ deseqResult <- function(data, target, export_csv=T, suffix='') {
 
 
 # Common
-countData <- function(data, restype = 'edgeR', normalized=T, export_csv=T, suffix='') {
+geneConversion <- function(genes, db, src, dest, select = 'first') {
+    return(mapIds(db, keys = genes, keytype = src, column = dest, multiVals = select))
+}
+
+countData <- function(data, restype = 'edgeR', export_csv=T, suffix='') {
     # Get count
-    counts <- NA
+    ncounts <- NA
     if (restype == 'edgeR') {}
     else if (restype == 'DESeq2') {
-        counts <- counts(data, normalized=normalized)
+        ncounts <- counts(data, normalized = TRUE)
     }
     # Export data as CSV
     if (export_csv) {
         # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'DEG'))
-        write.csv(counts, file = paste(suffix, "_counts.csv", sep=""))
-        setwd(parent)
+        path = "counts.csv"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        write.csv(ncounts, file = path)
     }
-    return(counts)
+    return(ncounts)
 }
 
 zScoreData <- function(counts, group, factors,
                         collabel = NA,
                         rowlabel = NA,
                         cluster = T, 
-
                         export_csv=T, suffix='') {
     means <- list()
     for (f in factors) {
         means[[f]] <- rowMeans(counts[, group == f])
     }
-    scores <- do.call(cbind, means)
-    scores <- scale(scores, center = TRUE, scale = TRUE)
+    zscores <- do.call(cbind, means)
+    m <- apply(zscores, 1, mean)
+    s <- apply(zscores, 1, sd)
+    zscores <- (zscores - m) / s
     #
-    if (collabel) colnames(scores) <- collabel
-    else colnames(scores) <- factors
-    if (rowlabel) rownames(scores) <- rowlabel
-    else rownames(scores) <- rownames(counts)
+    if (collabel) colnames(zscores) <- collabel
+    else colnames(zscores) <- factors
+    if (rowlabel) rownames(zscores) <- rowlabel
+    else rownames(zscores) <- rownames(counts)
     #
     if (cluster) {
         d <- dist(scores)
         hc <- hclust(d)
-        scores <- scores[hc$order,]
+        zscores <- zscores[hc$order,]
     }
     if (export_csv) {
-        # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result', 'DEG'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'DEG'))
-        write.csv(scores, file = paste(suffix, "_scores.csv", sep=""))
-        setwd(parent)
+        path = "zscores.csv"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        write.csv(ncounts, file = path)
     }
-    return(scores)
+    return(zscores)
 }
 
 expressionChanged <- function(result, 
@@ -120,12 +120,18 @@ expressionChanged <- function(result,
     #
     if (export_csv) {
         # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result'))
+        parent <- getwd()
+        dir <- file.path(parent, 'DEG')
+        dir.create(dir, showWarnings = FALSE)
+        setwd(dir)
         ## 
-        write.csv(up, file = paste(suffix, "_DEG_up.csv", sep=""))
-        write.csv(down, file = paste(suffix, "_DEG_down.csv", sep=""))
+        path <- "up.csv"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        write.csv(up, file = path)
+        path <- "down.csv" 
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        write.csv(down, file = path)
+        ##
         setwd(parent)
     }
     return(c(up=up, down=down))
@@ -138,6 +144,8 @@ enrichmentGO <- function(data,
                          q_threshold = 0.05, 
                          export_csv=T,
                          export_img=T,
+                         img_width = 8,
+                         img_height = 6,
                          dot_plot=T,
                          ont_network=T,
                          suffix='') {
@@ -147,12 +155,9 @@ enrichmentGO <- function(data,
     downgenes <- rownames(data$down)
     ## Gene ID conversion
     if (genetype != "ENTREZID") {
-        upgenes <- bitr(upgenes, fromType=genetype, toType="ENTREZID", OrgDb=org)
-        upgenes <- upgenes[, 2]
-        downgenes <- bitr(downgenes, fromType=genetype, toType="ENTREZID", OrgDb=org)
-        downgenes <- downgenes[, 2]
+        upgenes <- geneConversion(gene = upgenes, db = org, src = genetype, dest = "ENTREZID")
+        downgenes <- geneConversion(gene = downgenes, db = org, src = genetype, dest = "ENTREZID")
     }
-    
     # GO enrichment
     ## CC:Cellular Component, MF:Molecular Function, BP:Biological Process   
     for (t in gotype) {
@@ -171,33 +176,52 @@ enrichmentGO <- function(data,
         #
         if (export_csv) {
             # Make dir.
-            parent = getwd()
-            dir.create(file.path(parent, 'Result', 'GO'), showWarnings = FALSE)
-            setwd(file.path(parent, 'Result', 'GO'))
+            parent <- getwd()
+            dir <- file.path(parent, 'GO')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
             ## 
-            write.csv(go_up, file=paste(suffix, "_GO_", t, "_up.csv", sep=""))
-            write.csv(go_down, file = paste(suffix, "_GO_", t, "_down.csv", sep=""))
+            path <- paste("GO", t, "up.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(go_up, file = path)
+            path <- paste("GO", t, "down.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(go_down, file = path)
+            ##
             setwd(parent)
         }
         #
         if (export_img) {
             # Make dir.
-            parent = getwd()
-            dir.create(file.path(parent, 'Result', 'Chart'), showWarnings = FALSE)
-            setwd(file.path(parent, 'Result', 'Chart'))
+            parent <- getwd()
+            dir <- file.path(parent, 'Chart')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
             ##
             if (dot_plot) {
+                ##                
                 up_dot <- dotplot(go_up)
+                path <- paste("GO", t, "up", "dot", sep="_")
+                if (suffix != '') path = paste(suffix, path, sep="_")
+                exportImage(up_dot, path, "png", width = img_width, height = img_height, resolution=150)
+                ##
                 down_dot <- dotplot(go_down)
-                exportImage(up_dot, paste(suffix, "_GO_", t, "_up_dot", sep=""), "png", width = 3, height = 3, resolution=150)
-                exportImage(down_dot, paste(suffix, "_GO_", t, "_down_dot", sep=""), "png", width = 3, height = 3, resolution=150)
+                path <- paste("GO", t, "down", "dot", sep="_")
+                if (suffix != '') path = paste(suffix, path, sep="_")
+                exportImage(down_dot, path, "png", width = img_width, height = img_height, resolution=150)
             }
             ##
             if (ont_network) {
+                ##
                 up_net <- goplot(go_up)
+                path <- paste("GO", t, "up", "net", sep="_")
+                if (suffix != '') path = paste(suffix, path, sep="_")
+                exportImage(up_net, path, "png", width = img_width, height = img_height, resolution=150)
+                ##
                 down_net <- goplot(go_down)
-                exportImage(up_net, paste(suffix, "_GO_", t, "_up_net", sep=""), "png", width = 3, height = 3, resolution=150)
-                exportImage(down_net, paste(suffix, "_GO_", t, "_down_net", sep=""), "png", width = 3, height = 3, resolution=150)               
+                path <- paste("GO", t, "down", "net", sep="_")
+                if (suffix != '') path = paste(suffix, path, sep="_")
+                exportImage(down_net, path, "png", width = img_width, height = img_height, resolution=150)
             }
             setwd(parent)
         }
@@ -212,6 +236,8 @@ enrichmentPathway <- function(data,
                               q_threshold = 0.05, 
                               export_csv=T,
                               export_img=T,
+                              img_width = 8,
+                              img_height = 6,
                               suffix='') {
                              
     # Preset gene list
@@ -219,13 +245,10 @@ enrichmentPathway <- function(data,
     downgenes <- rownames(data$down)
     ## Gene ID conversion
     if (genetype != "ENTREZID") {
-        upgenes <- bitr(upgenes, fromType=genetype, toType="ENTREZID", OrgDb=org)
-        print(upgenes[is.na(upgenes[,2]), 1])
-        upgenes <- upgenes[, 2]
-        downgenes <- bitr(downgenes, fromType=genetype, toType="ENTREZID", OrgDb=org)
-        downgenes <- downgenes[, 2]
+        upgenes <- geneConversion(gene = upgenes, db = org, src = genetype, dest = "ENTREZID")
+        downgenes <- geneConversion(gene = downgenes, db = org, src = genetype, dest = "ENTREZID")
     }
-
+    
     # KEGG enrichment
     if (target == 'KEGG') {
         kegg_up <- enrichKEGG(
@@ -245,74 +268,121 @@ enrichmentPathway <- function(data,
         #
         if (export_csv) {
             # Make dir.
-            parent = getwd()
-            dir.create(file.path(parent, 'Result', 'KEGG'), showWarnings = FALSE)
-            setwd(file.path(parent, 'Result', 'KEGG'))
+            parent <- getwd()
+            dir <- file.path(parent, 'KEGG')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
             ## 
-            write.csv(kegg_up, file=paste(suffix, "_KEGG_up.csv", sep=""))
-            write.csv(kegg_down, file = paste(suffix, "_KEGG_down.csv", sep=""))
+            path <- paste("KEGG", "up.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(kegg_up, file = path)
+            path <- paste("KEGG", "down.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(kegg_down, file = path)
+            ##
             setwd(parent)
         }
         #
         if (export_img) {
             # Make dir.
-            parent = getwd()
-            dir.create(file.path(parent, 'Result', 'Chart'), showWarnings = FALSE)
-            setwd(file.path(parent, 'Result', 'Chart'))
+            parent <- getwd()
+            dir <- file.path(parent, 'Chart')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
             ##
             up_dot <- dotplot(kegg_up)
+            path <- "KEGG_up_net"
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            exportImage(up_dot, path, "png", width = img_width, height = img_height, resolution=150)
+            ##
             down_dot <- dotplot(kegg_down)
-            exportImage(up_dot, paste(suffix, "_KEGG_up_dot", sep=""), "png", width = 6, height = 6, resolution=150)
-            exportImage(down_dot, paste(suffix, "_KEGG_down_dot", sep=""), "png", width = 6, height = 6, resolution=150)
+            path <- "KEGG_down_net"
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            exportImage(down_dot, path, "png", width = img_width, height = img_height, resolution=150)
             ##
             setwd(parent)
         }
     }
 }
 
-heatMap <- function(counts, export_img = T, suffix = '') {
-    plt = ggplot(counts, aes(Condition, Genes, fill = Count)) + 
+scoreHeatMap <- function(scores, 
+                         export_img = T, 
+                         img_width = 8,
+                         img_height = 6,
+                         suffix = '') {
+    genes <- rep(rownames(scores), ncol(scores))
+    conditions <- c()
+    values <- c()
+    for (c in c(1:ncol(scores))) {
+        conditions <- c(conditions, rep(colnames(scores)[c], nrow(scores)))
+        values <- c(values, scores[, c])
+    }
+    data <- data.frame(Condition = conditions, Genes = genes, Value = values)
+    plt = ggplot(data, aes(Condition, Genes, fill = Value)) + 
             geom_tile()                    
     if (export_img) {
         # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result', 'Chart'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'Chart'))
+        parent <- getwd()
+        dir <- file.path(parent, 'Chart')
+        dir.create(dir, showWarnings = FALSE)
+        setwd(dir)
         ##
-        exportImage(plt, paste(suffix, "_hmap", sep=""), "png", width = 8, height = 6, resolution=150)
+        path = "hmap"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        exportImage(plt, path, "png", width = img_width, height = img_height, resolution=150)
         setwd(parent)
     }
     return(plt)
 }
 
-vennPlot <- function(data, color = c("white", "turquoise"), export_img = T, suffix = '') {
+vennPlot <- function(data, 
+                     color = c("white", "turquoise"), 
+                     export_img = T, 
+                     img_width = 8,
+                     img_height = 6,
+                     suffix = '') {
     plt = ggVennDiagram(data) + 
             scale_fill_gradient(low = color[1], high = color[2])
     #
     if (export_img) {
         # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result', 'Chart'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'Chart'))
+        parent <- getwd()
+        dir <- file.path(parent, 'Chart')
+        dir.create(dir, showWarnings = FALSE)
+        setwd(dir)
         ##
-        exportImage(plt, paste(suffix, "_venn", sep=""), "png", width = 8, height = 6, resolution=150)
+        path = "venn"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        exportImage(plt, path, "png", width = img_width, height = img_height, resolution=150)
         setwd(parent)
     }
     return(plt)
 }
 
-maPlot <- function(counts) {
+maPlot <- function(result,
+                   counts,
+                   restype = 'edgeR',
+                   fc_limit = c(1, Inf ),
+                   p_threshold = 0.05, 
+                   q_threshold = 0.05, 
+                   export_img=T, 
+                   img_width = 8,
+                   img_height = 6,
+                   suffix='') {
     
                              
     
 }
 
 volcanoPlot <- function(result,
-                       restype = 'edgeR',
-                       fc_limit = c(1, Inf ),
-                       p_threshold = 0.05, 
-                       q_threshold = 0.05, 
-                       export_img=T, suffix='') {
+                        restype = 'edgeR',
+                        fc_limit = c(1, Inf ),
+                        p_threshold = 0.05, 
+                        q_threshold = 0.05, 
+                        export_img=T, 
+                        img_width = 8,
+                        img_height = 6,
+                        suffix='') {
     #
     plt <- NA
     #
@@ -339,11 +409,14 @@ volcanoPlot <- function(result,
     #
     if (export_img) {
         # Make dir.
-        parent = getwd()
-        dir.create(file.path(parent, 'Result', 'Chart'), showWarnings = FALSE)
-        setwd(file.path(parent, 'Result', 'Chart'))
+        parent <- getwd()
+        dir <- file.path(parent, 'Chart')
+        dir.create(dir, showWarnings = FALSE)
+        setwd(dir)
         ##
-        exportImage(plt, paste(suffix, "_volcano", sep=""), "png", width = 6, height = 6, resolution=150)
+        path = "volcano"
+        if (suffix != '') path = paste(suffix, path, sep="_")
+        exportImage(plt, path, "png", width = img_width, height = img_height, resolution=150)
         setwd(parent)
     }
     return(plt)    
