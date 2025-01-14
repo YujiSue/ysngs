@@ -19,3 +19,13 @@ exportImageColab <- function(plot,output,format="png",width=3,height=3,resolutio
     }
     else exportImage(plot,output,format=format,width=width,height=height,resolution=resolution)
 }
+#
+exportHTML <- function(plot, output, style = NA) {
+    if (is.na(style)) widget <- plot
+    else widget <- htmlwidgets::onRender(plot, style)
+    htmlwidgets::saveWidget(
+        widget,
+        file = output,
+        selfcontained = TRUE
+    )
+}

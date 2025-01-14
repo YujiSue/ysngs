@@ -814,11 +814,17 @@ def installRHumanGeneSet(prop):
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['AnnotationDbi'], output = None)
   if not ret[0] or 'TRUE' not in ret[1]:
     assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['AnnotationDbi'], output = None)[0]
-  print('Install human gene annotation DB (R) ...')
-  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Hs.eg.db'], output = None)[0]
-  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Hs.eg.db'], output = None)
-  print('Completed.')
-  print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['org.Hs.eg.db'], output = None)
+  if not ret[0] or 'TRUE' not in ret[1]:
+    print('Install human gene annotation DB (R) ...')
+    assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Hs.eg.db'], output = None)[0]
+    ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Hs.eg.db'], output = None)
+    print('Completed.')
+    print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+  else:
+    print('Human gene annotation DB (R) is installed.')
+    ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Hs.eg.db'], output = None)
+    print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
 
 def installRMouseGeneSet(prop):
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['AnnotationDbi'], output = None)
@@ -832,11 +838,18 @@ def installRMouseGeneSet(prop):
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
 
 def installEA(prop):
-  print('Install clusterProfiler (R) ...')
-  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['clusterProfiler'], output = None)[0]
-  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['clusterProfiler'], output = None)
-  print('Completed.')
-  print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['clusterProfiler'], output = None)
+  if not ret[0] or 'TRUE' not in ret[1]:
+    print('Install clusterProfiler (R) ...')
+    assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['clusterProfiler'], output = None)[0]
+    ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['clusterProfiler'], output = None)
+    print('Completed.')
+    print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+  else:
+    print('clusterProfiler (R) is installed.')
+    ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['clusterProfiler'], output = None)
+    print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+  
   print('Install pathview (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['pathview'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['pathview'], output = None)
@@ -846,7 +859,7 @@ def installEA(prop):
 # Graphics
 def installRChart(prop):
   print('Install tidyverse related libraries and  (R) ...')
-  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['plotly', 'pandoc', 'ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
   print('Completed.')
   
 
