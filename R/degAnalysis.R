@@ -1,8 +1,3 @@
-# CummeRbund
-
-
-
-
 # DESeq2
 
 deseqData <- function(data, group, formula) {
