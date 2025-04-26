@@ -304,6 +304,10 @@
 		"name": "R annotation DB for mouse", 
 		"installer": "installRMouseGeneSet" 
 	},
+	"wormDB": {
+		"name": "R annotation DB for worm (C. elegans)", 
+		"installer": "installRWormGeneSet" 
+	},
 	"macs2": { 
 		"name": "MACS2", 
 		"ver":"v2.2.7.1", 

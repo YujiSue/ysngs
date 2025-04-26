@@ -837,6 +837,18 @@ def installRMouseGeneSet(prop):
   print('Completed.')
   print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
 
+def installRWormGeneSet(prop):
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['AnnotationDbi'], output = None)
+  if not ret[0] or 'TRUE' not in ret[1]:
+    assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['AnnotationDbi'], output = None)[0]
+  scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
+  print('Install mouse gene annotation DB (R) ...')
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Ce.eg.db'], output = None)[0]
+  ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Ce.eg.db'], output = None)
+  print('Completed.')
+  print('>ver.', ret[1].strip().split(' ')[-1][1:-1])
+
+
 def installEA(prop):
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkg.R'), args=['clusterProfiler'], output = None)
   if not ret[0] or 'TRUE' not in ret[1]:
@@ -859,9 +871,9 @@ def installEA(prop):
 # Graphics
 def installRChart(prop):
   print('Install tidyverse related libraries and  (R) ...')
-  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['plotly', 'pandoc', 'ggplot2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
+  assert common.execCmd('pip install -U kaleido', showcmd=False)[0]
+  assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installPkg.R'), args=['plotly', 'rlang', 'pandoc', 'reticulate', 'ggplot2', 'reshape2', 'ggarchery', 'ggVennDiagram'], output = None)[0]  
   print('Completed.')
-  
 
 # MACS2
 def checkMACS(cfg):

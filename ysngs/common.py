@@ -1,7 +1,10 @@
 import os
+import json
 import importlib
 import subprocess
+import plotly.io as pio
 from ysngs import installer
+
 def checkEnv(key):
   return key in os.environ
 
@@ -58,7 +61,6 @@ def execCmd(cmd, showcmd = True, verbose = False):
     ret = proc.communicate()
     return [proc.returncode==0, ret[0].strip() if ret[0] else None, ret[1].strip() if ret[1] else None]
 
-
 def execFunc(module, name, *args, **kwargs):
     try:
         func = getattr(module, name)
@@ -85,6 +87,21 @@ def runRScript(script, output=None, args=[], showcmd=True):
   if output and os.path.exists(output):
     cmd += ' > ' + output
   return execCmd(cmd, showcmd = True, verbose = False)
+
+def showRPlotly(file, ignore_tags = ["frame"], replace_tags=[]) :
+  fig = None
+  txt = ''
+  with open(file, "r") as f:
+    txt = f.read()
+  for tagset in replace_tags:
+    txt = txt.replace(tagset[0], tagset[1])
+  plt = json.loads(txt)
+  for trace in plt.get("data", []):
+    for tag in ignore_tags:
+      trace.pop(tag, None)
+  fig = pio.from_json(json.dumps(plt))
+  if fig:
+    fig.show()
 
 def hasMultipleObjects(v):
   return (type(v) is list)

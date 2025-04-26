@@ -1,6 +1,7 @@
 from ysngs.common import (
     addPath,
     runRScript,
+    showRPlotly,
     curlDownload,
     execCmd
 )
