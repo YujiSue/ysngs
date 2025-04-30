@@ -1,3 +1,23 @@
+# Data loader
+## Cufflinks
+loadCuffData <- function(filepath) {
+    rawdata <- read.csv(filepath, header=T, sep="\t")
+    return(rawdata)
+}
+
+## HTSeq
+loadHTSeqData <- function(filepath) {
+    rawdata <- read.csv(filepath, header=F, sep="\t")
+    colnames(rawdata) <- c("gene_id", "count")
+    return(rawdata)
+}
+
+## RSEM
+loadHTSeqData <- function(filepath) {
+    rawdata <- read.csv(filepath, header=T, sep="\t")
+    return(rawdata)
+}
+
 # DESeq2
 
 deseqData <- function(data, group, formula) {
@@ -54,7 +74,9 @@ deseqResult <- function(data, target, export_csv=T, suffix='') {
     return(res)
 }
 
+
 # EdgeR
+
 edgerAnalyze <- function(data, group, formula) {
     dge <- DGEList(counts = data, group = group)
     dge <- calcNormFactors(dge)
@@ -101,6 +123,7 @@ geneConversion <- function(genes, db, src, dest, select = 'first') {
     return(conv)
 }
 
+# 
 expressionChanged <- function(result,
                               restype = 'edgeR',
                               fc_limit = c(1, Inf ),
@@ -167,12 +190,13 @@ expressionChanged <- function(result,
     }
     return(c(up=up, down=down))
 }
-
+# 
 zScoreData <- function(counts, group, factors,
                         collabel = c(),
                         rowlabel = c(),
                         cluster = T,
                         export_csv=F,
+                        export_json=F,
                         export_html=T,
                         image_width=640,
                         image_height=NA,
@@ -224,7 +248,7 @@ zScoreData <- function(counts, group, factors,
     }
     return(zscores)
 }
-
+#
 volcanoPlot <- function(result,
                         org,
                         genetype = 'ENTREZID',
@@ -329,7 +353,7 @@ volcanoPlot <- function(result,
     }
     return(plt)
 }
-
+#
 enrichmentGO <- function(data,
                          org,
                          genetype = 'ENTREZID',
@@ -428,7 +452,102 @@ enrichmentGO <- function(data,
         }
     }
 }
+#
+enrichmentGS <- function(data,
+                         org,
+                         genetype = 'ENTREZID',
+                         q_threshold = 0.05,
+                         export_csv=T,
+                         export_img=T,
+                         img_width = 8,
+                         img_height = 6,
+                         dot_plot=T,
+                         ont_network=T,
+                         suffix='') {
 
+    # Preset gene list
+    upgenes <- rownames(data$up)
+    downgenes <- rownames(data$down)
+    ## Gene ID conversion
+    if (genetype != "ENTREZID") {
+        upgenes <- geneConversion(genes = upgenes, db = org, src = genetype, dest = "ENTREZID")
+        downgenes <- geneConversion(genes = downgenes, db = org, src = genetype, dest = "ENTREZID")
+    }
+    # GSEA
+    for (t in gotype) {
+        gs_up <- gseGO(gene = upgenes,
+                 OrgDb = org,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = q_threshold)
+
+        gs_down <- gseGO(gene = downgenes,
+                 OrgDb = org,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = q_threshold)
+
+        #
+        if (export_csv) {
+            # Make dir.
+            parent <- getwd()
+            dir <- file.path(parent, 'GSEA')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
+            ##
+            path <- paste("GSEA", t, "up.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(gs_up, file = path)
+            path <- paste("GSEA", t, "down.csv", sep="_")
+            if (suffix != '') path = paste(suffix, path, sep="_")
+            write.csv(gs_down, file = path)
+            ##
+            setwd(parent)
+        }
+        #
+        if (export_img) {
+            # Make dir.
+            parent <- getwd()
+            dir <- file.path(parent, 'Chart')
+            dir.create(dir, showWarnings = FALSE)
+            setwd(dir)
+            ##
+            if (dot_plot) {
+                ##
+                if (0 < nrow(gs_up)) {
+                    up_dot <- dotplot(gs_up)
+                    path <- paste("GSEA", t, "up", "dot", sep="_")
+                    if (suffix != '') path = paste(suffix, path, sep="_")
+                    exportImage(up_dot, path, "png", width = img_width, height = img_height, resolution=150)
+                }
+                ##
+                if (0 < nrow(gs_down)) {
+                    down_dot <- dotplot(gs_down)
+                    path <- paste("GSEA", t, "down", "dot", sep="_")
+                    if (suffix != '') path = paste(suffix, path, sep="_")
+                    exportImage(down_dot, path, "png", width = img_width, height = img_height, resolution=150)
+                }
+            }
+            ##
+            if (ont_network) {
+                ##
+                if (0 < nrow(gs_up)) {
+                    up_net <- goplot(gs_up)
+                    path <- paste("GSEA", t, "up", "net", sep="_")
+                    if (suffix != '') path = paste(suffix, path, sep="_")
+                    exportImage(up_net, path, "png", width = img_width, height = img_height, resolution=150)
+                }
+                ##
+                if (0 < nrow(gs_down)) {
+                    down_net <- goplot(gs_down)
+                    path <- paste("GSEA", t, "down", "net", sep="_")
+                    if (suffix != '') path = paste(suffix, path, sep="_")
+                    exportImage(down_net, path, "png", width = img_width, height = img_height, resolution=150)
+                }
+            }
+            setwd(parent)
+        }
+    }
+}
+#
 enrichmentPathway <- function(data,
                               org,
                               genetype = 'ENTREZID',
@@ -454,6 +573,7 @@ enrichmentPathway <- function(data,
     if (target == 'KEGG') {
         kegg_up <- enrichKEGG(
             gene = upgenes,
+            organism = org,
             minGSSize = gs_size[1],
             maxGSSize = gs_size[2],
             pAdjustMethod = "BH",
@@ -461,6 +581,7 @@ enrichmentPathway <- function(data,
 
         kegg_down <- enrichKEGG(
             gene = downgenes,
+            organism = org,
             minGSSize = gs_size[1],
             maxGSSize = gs_size[2],
             pAdjustMethod = "BH",
@@ -509,7 +630,7 @@ enrichmentPathway <- function(data,
         }
     }
 }
-
+#
 vennPlot <- function(data,
                      color = c("white", "turquoise"),
                      export_img = T,
@@ -534,11 +655,12 @@ vennPlot <- function(data,
     }
     return(plt)
 }
-
-pathwayView <- function(genes, target, species, suffix = '') {
+#
+pathwayView <- function(genes, target, species, genetype='Entrez', suffix = '') {
     pview <- pathview(gene.data = genes,
                       pathway.id = target,
                       species = species,
+                      gene.idtype = genetype,
                       out.suffix = suffix)
     return(pview)
 }

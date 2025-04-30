@@ -842,7 +842,7 @@ def installRWormGeneSet(prop):
   if not ret[0] or 'TRUE' not in ret[1]:
     assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['AnnotationDbi'], output = None)[0]
   scrpt = os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R')
-  print('Install mouse gene annotation DB (R) ...')
+  print('Install worm gene annotation DB (R) ...')
   assert common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'installBMPkg.R'), args=['org.Ce.eg.db'], output = None)[0]
   ret = common.runRScript(os.path.join(os.environ['HYM_SCRIPT'], 'R', 'checkBMPkgVer.R'), args=['org.Ce.eg.db'], output = None)
   print('Completed.')
