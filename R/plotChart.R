@@ -29,8 +29,8 @@ hmapPlot <- function(data, #data.frame
                     lib = "ggplot") {
     #
     range <- zrange
-    if (is.na(range[["max"]])) range[["max"]] <- max(unlist(data), na.rm = TRUE)
-    if (is.na(range[["min"]])) range[["min"]] <- min(unlist(data), na.rm = TRUE)
+    if (is.na(range[["max"]])) range[["max"]] <- round(max(unlist(data), na.rm = TRUE),1)+0.1
+    if (is.na(range[["min"]])) range[["min"]] <- round(min(unlist(data), na.rm = TRUE),1)-0.1
     if (is.na(range[["mid"]])) range[["mid"]] <- (range[["max"]] + range[["min"]]) / 2
     #
     if (lib == "ggplot") {
@@ -77,14 +77,12 @@ hmapPlot <- function(data, #data.frame
                         z = as.matrix(data),
                         type = "heatmap",
                         colorscale = cs,
+                        zmin = range[["min"]],
+                        zmax = range[["max"]],
+                        zmid = range[["mid"]],
                         showscale = showscale)
         
         plt <- plt %>% layout(
-            coloraxis = list(
-                zmin = range[["min"]],
-                zmax = range[["max"]],
-                zmid = range[["mid"]]
-            ),
             xaxis = list(side ="top", title = labels[["x"]]),
             yaxis = list(title = labels[["y"]], autorange = "reversed"),
             scene = list(zaxis = list( title = labels[["z"]]))
