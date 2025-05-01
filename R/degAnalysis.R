@@ -657,10 +657,21 @@ vennPlot <- function(data,
 }
 #
 pathwayView <- function(genes, target, species, genetype='Entrez', suffix = '') {
-    pview <- pathview(gene.data = genes,
+    pview <- NA
+    tryCatch({
+        pview <- pathview(gene.data = genes,
                       pathway.id = target,
                       species = species,
                       gene.idtype = genetype,
                       out.suffix = suffix)
+    },
+    error = function(e) {
+        pview <- pathview(gene.data = genes,
+                      pathway.id = target,
+                      species = species,
+                      gene.idtype = genetype,
+                      same.layer = FALSE,
+                      out.suffix = suffix)
+    })    
     return(pview)
 }
