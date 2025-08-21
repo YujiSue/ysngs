@@ -609,7 +609,7 @@ def installSift(prop):
     print('SIFT-4G is installed.')
   else:
     print('Install SIFT-4G ...')
-    common.curlDownload(prop['url'], '$HYM_APP')
+    common.curlDownload(prop['url'], '$HYM_APP/SIFT4G_Annotator.jar')
     print('Completed.')
     print('>ver.', checkVerSift())
   
