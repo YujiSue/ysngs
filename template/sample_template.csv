@@ -1,0 +1,3 @@
+SampleID,Sample,Library,Platform,Type,File
+Example1,Test1,Lib1,Illumina,paired,paired_seq_{12}.fq
+Example2,Test2,Lib2,ionTorrent,single,single_seq.fq
