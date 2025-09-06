@@ -21,8 +21,14 @@ class AppManager:
     def is_installed(self, name):
         return common.execFunc(installer, self.apps[name]['checker'])
     
-    def install(self, name):
-        return common.execFunc(installer, self.apps[name]['installer'], self.apps[name])
+    def install(self, name, silent=False, ver=None):
+        if name not in self.apps:
+            print(f"{name} is not supported.")
+        prop = self.apps[name]
+        prop['verbose'] = not silent
+        if ver:
+            prop['ver'] = ver
+        return common.execFunc(installer, self.apps[name]['installer'], prop)
     # def update(self):
     # def uninstall(self):
     
