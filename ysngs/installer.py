@@ -152,11 +152,11 @@ def installSamtools(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"tar xvf {fname}", showcmd = False)[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
     os.chdir(fname[0:fname.find('.tar')])
-    assert common.execCmd('./configure', showcmd = False, verbose=True)[0], 'Configure error.'
-    assert common.execCmd('make -j8', showcmd = False, verbose=True)[0], 'Make error.'
-    assert common.execCmd('sudo make install', showcmd = False, verbose=True)[0], 'Install error.'
+    assert common.execCmd('./configure', showcmd=True, verbose=prop["verbose"])[0], 'Configure error.'
+    assert common.execCmd('make -j8', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
+    assert common.execCmd('sudo make install', showcmd=True, verbose=prop["verbose"])[0], 'Install error.'
     print('Completed.')
     print('> ver.', checkVerSamtools())
 
@@ -178,9 +178,9 @@ def installBCFtools(prop):
     fname = os.path.split(prop['url'])[1]
     assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
     os.chdir(fname[0:fname.find('.tar')])
-    assert common.execCmd('./configure', showcmd=False, verbose=True)[0], 'Configure error.'
-    assert common.execCmd('make -j8', showcmd=False, verbose=True)[0], 'Make error.'
-    assert common.execCmd('sudo make install', showcmd=False)[0], 'Install error.'
+    assert common.execCmd('./configure', showcmd=True, verbose=prop["verbose"])[0], 'Configure error.'
+    assert common.execCmd('make -j8', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
+    assert common.execCmd('sudo make install', showcmd=True)[0], 'Install error.'
     os.chdir(os.environ['HYM_TEMP'])
     assert common.execCmd('rm -r ./bcftools*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
@@ -236,7 +236,7 @@ def installCut(prop):
     print('cutadapt is installed.')
   else:
     print('Install cutadapt  ...')
-    assert common.execCmd('pip install cutadapt', verbose=True)[0], 'Install error.'
+    assert common.execCmd('pip install cutadapt', showcmd=True, verbose=prop["verbose"])[0], 'Install error.'
     print('Completed.')
     print('>ver.', checkVerCut())
 
@@ -255,10 +255,10 @@ def installFQC(prop):
     os.chdir(os.environ['HYM_TEMP'])
     assert common.curlDownload(prop['url'])[0], 'Download error.'
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"unzip {fname}", verbose=prop['verbose'])[0], 'Expansion error.'
-    assert common.execCmd('mv FastQC $HYM_APP', verbose=prop['verbose'])[0], 'File move error.'
-    assert common.execCmd('chmod a+x $HYM_APP/FastQC/fastqc', verbose=prop['verbose'])[0], 'Permission setting error.'
-    assert common.execCmd('rm -r ./*')[0]
+    assert common.execCmd(f"unzip {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd('mv FastQC $HYM_APP', showcmd=True)[0], 'File move error.'
+    assert common.execCmd('chmod a+x $HYM_APP/FastQC/fastqc', showcmd=True, verbose=prop['verbose'])[0], 'Permission setting error.'
+    assert common.execCmd('rm -r ./*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerFQC())
@@ -276,7 +276,7 @@ def installFP(prop):
   else:
     print('Install fastp  ...')
     assert common.curlDownload(prop['url'], '$HYM_APP/fastp')[0], 'Download error.'
-    assert common.execCmd('chmod a+x $HYM_APP/fastp', verbose=prop['verbose'])[0], 'Permission setting error.'
+    assert common.execCmd('chmod a+x $HYM_APP/fastp', showcmd=True, verbose=prop['verbose'])[0], 'Permission setting error.'
     print('Completed.')
     print('>ver.', checkVerFP())
 
@@ -294,13 +294,13 @@ def installBWA(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[-1]
-    assert common.execCmd(f"tar xvf {fname}", verbose=prop['verbose'])[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=True, verbose=prop['verbose'])[0], 'Expansion error.'
     fname = f"bwa-{fname[1:fname.find('.tar')]}"
     os.chdir(fname)
-    common.execCmd(f"sed -i 's/const uint8_t rle_auxtab/extern const uint8_t rle_auxtab/g' rle.h", verbose=prop['verbose'])
-    assert common.execCmd('make -j8', verbose=prop['verbose'])[0], 'Make error.'
-    assert common.execCmd('cp bwa $HYM_APP', verbose=prop['verbose'])[0], 'File copy error.'
-    assert common.execCmd(f"rm -r {os.path.join(os.environ['HYM_TEMP'], '*')}", verbose=prop['verbose'])[0]
+    common.execCmd(f"sed -i 's/const uint8_t rle_auxtab/extern const uint8_t rle_auxtab/g' rle.h", showcmd=True, verbose=prop['verbose'])
+    assert common.execCmd('make -j8', showcmd=True, verbose=prop['verbose'])[0], 'Make error.'
+    assert common.execCmd('cp bwa $HYM_APP', showcmd=True, verbose=prop['verbose'])[0], 'File copy error.'
+    assert common.execCmd(f"rm -r {os.path.join(os.environ['HYM_TEMP'], '*')}", showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('> ver.', checkVerBWA())
@@ -320,9 +320,9 @@ def installBowtie(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[-1]
-    assert common.execCmd(f"unzip -o {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"unzip -o {fname}", showcmd=True)[0], 'Expansion error.'
     fname = fname[0:fname.find('.zip')]
-    assert common.execCmd(f"mv {fname} $HYM_APP/bowtie2", showcmd=False, verbose=True)[0], 'Make error.'
+    assert common.execCmd(f"mv {fname} $HYM_APP/bowtie2", showcmd=True)[0], 'Make error.'
     assert common.execCmd('rm -r ./*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
@@ -342,12 +342,12 @@ def installSTAR(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[-1]
-    assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=True)[0], 'Expansion error.'
     fname = f"STAR-{fname[0:fname.find('.tar')]}"
     os.chdir(os.path.join(fname, 'source'))
-    assert common.execCmd('make -j8 STAR', showcmd=False, verbose=True)[0], 'Make error.'
+    assert common.execCmd('make -j8 STAR', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
     os.chdir(os.environ['HYM_TEMP'])
-    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], 'STAR')}")[0]
+    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], 'STAR')}", showcmd=True)[0]
     assert common.execCmd('rm -r ./*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
