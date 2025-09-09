@@ -217,8 +217,9 @@ def installGATK(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"unzip -o {fname}", showcmd=False)[0], 'Expansion error.'
-    assert common.execCmd(f"mv ./gatk* {os.path.join(os.environ['HYM_APP'], 'gatk')}", showcmd=False)[0]
+    assert common.execCmd(f"unzip -o {fname}", showcmd=True)[0], 'Expansion error.'
+    assert common.execCmd(f"rm gatk*.zip", showcmd=True)[0]
+    assert common.execCmd(f"mv gatk* {os.path.join(os.environ['HYM_APP'], 'gatk')}", showcmd=True)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerGATK())
