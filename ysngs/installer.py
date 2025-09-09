@@ -210,7 +210,7 @@ def checkVerGATK():
   res = common.execCmd(os.path.join(os.environ['HYM_APP'], 'gatk/gatk --list'), showcmd=False)
   return res[2].splitlines()[0].split('-')[-2]
 def installGATK(prop):
-  if checkSamtools():
+  if checkGATK():
     print('GATK is installed.')
   else:
     print('Install GATK ...')

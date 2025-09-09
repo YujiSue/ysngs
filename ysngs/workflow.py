@@ -8,8 +8,8 @@ class WorkFlow:
     self.script = script
     self.apps = appmanager.AppManager()
     os.chdir(os.environ['HYM_WS'])
-    if not self.apps.is_installed('crom'):
-        self.apps.install('crom')
+    if not self.apps.is_installed('cromwell'):
+        self.apps.install('cromwell')
 
   def run(self, input):
     res = common.execCmd(f"java -jar $HYM_APP/cromwell.jar run --inputs {input} {self.script}", verbose=True)

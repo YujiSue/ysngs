@@ -15,7 +15,7 @@
 		"installer": "installSutoku", 
 		"url" : "https://github.com/YujiSue/Sutoku.git"
 	},
-	"crom": {
+	"cromwell": {
 		"name": "Cromwell", 
 		"ver": "86", 
 		"checker": "checkCromwell", 
