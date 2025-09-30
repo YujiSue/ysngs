@@ -259,7 +259,7 @@ def installFQC(prop):
     assert common.execCmd(f"unzip {fname}", showcmd=False)[0], 'Expansion error.'
     assert common.execCmd('mv FastQC $HYM_APP', showcmd=True)[0], 'File move error.'
     assert common.execCmd('chmod a+x $HYM_APP/FastQC/fastqc', showcmd=True, verbose=prop['verbose'])[0], 'Permission setting error.'
-    assert common.execCmd('rm -r ./*', showcmd=False)[0]
+    assert common.execCmd('rm ./fastqc*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerFQC())

@@ -52,7 +52,7 @@ task fastp {
         Int? thread = 2
     }
     command <<<
-        mkdir -p $HYM_DATA/~{dir}
+        mkdir -p ~{dir}
         $HYM_APP/fastp -w ~{thread} \
           ~{option} \
           ~{in1} \

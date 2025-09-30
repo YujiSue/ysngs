@@ -7,12 +7,11 @@ workflow bwaalign {
     input {
         Array[String] fastq
         String read_info
-#        Map[String, String] read_info
         String reference
         String out_dir
         String out_name
         Int thread
-        Boolean clean
+        Boolean? clean = true
     }
     call bwa.bwamap as bwamap {
         input:
@@ -26,11 +25,13 @@ workflow bwaalign {
     call samtools.sam2bam as sam2bam {
         input:
             sam = bwamap.sam,
+            dir = out_dir,
             thread = thread
     }
     call samtools.bamsort as bamsort {
         input:
             bam = sam2bam.rawbam,
+            dir = out_dir,
             thread = thread
     }
     call gatk.markdp as markdp {
