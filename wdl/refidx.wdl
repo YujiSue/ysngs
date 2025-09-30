@@ -17,7 +17,7 @@ workflow refidx {
         Boolean useRSEM
         String fa
         String label
-        Int thread
+        Int? thread = 2
     }
     call samtools.makefaidx {
         input:

@@ -586,15 +586,15 @@ def installEVEP(prop):
     print('Ensembl-VEP is installed.')
   else:
     print('Install Ensembl-VEP ...')
-    assert common.execCmd("yes '' | sudo cpan Module::Build", showcmd=False, verbose=True)[0], 'Module::Build install error.'
-    assert common.execCmd("yes '' | sudo cpan Archive::Zip", showcmd=False, verbose=True)[0], 'Archive::Zip install error.'
-    assert common.execCmd("yes '' | sudo cpan DBD::mysql", showcmd=False, verbose=True)[0], 'DBD::mysql install error.'
-    assert common.execCmd("yes '' | sudo cpan DBI", showcmd=False, verbose=True)[0], 'DBI install error.'
-    assert common.execCmd("yes '' | sudo cpan Bio::Root::Version", showcmd=False, verbose=True)[0], 'Bio::Root::Version install error.'
+    assert common.execCmd("yes '' | sudo cpan Module::Build", showcmd=True, verbose=prop["verbose"])[0], 'Module::Build install error.'
+    assert common.execCmd("yes '' | sudo cpan Archive::Zip", showcmd=True, verbose=prop["verbose"])[0], 'Archive::Zip install error.'
+    assert common.execCmd("yes '' | sudo cpan DBD::mysql", showcmd=True, verbose=prop["verbose"])[0], 'DBD::mysql install error.'
+    assert common.execCmd("yes '' | sudo cpan DBI", showcmd=True, verbose=prop["verbose"])[0], 'DBI install error.'
+    assert common.execCmd("yes '' | sudo cpan Bio::Root::Version", showcmd=True, verbose=prop["verbose"])[0], 'Bio::Root::Version install error.'
     os.chdir(os.environ['HYM_APP'])  
-    assert common.execCmd(f"git clone {prop['url']}", showcmd=False)[0], 'Git clone error.'
+    assert common.execCmd(f"git clone {prop['url']}", showcmd=True)[0], 'Git clone error.'
     os.chdir(os.path.join(os.environ['HYM_APP'], 'ensembl-vep'))
-    assert common.execCmd("yes '' | perl INSTALL.pl", showcmd=False, verbose=True)[0], 'Install error.'
+    assert common.execCmd("yes '' | perl INSTALL.pl", showcmd=True, verbose=prop["verbose"])[0], 'Install error.'
     print('Completed.')
     print('>ver.', checkVerEVEP())
 
@@ -650,16 +650,16 @@ def installInterPro(prop):
     print('InterProScan is installed.')
   else:
     print('Install InterProScan ...')
-    assert common.execCmd('sudo apt-get install libdw1', showcmd=False, verbose=True)[0], 'Install error.'
+    assert common.execCmd('sudo apt-get install libdw1', showcmd=True, verbose=prop['verbose'])[0], 'Install error.'
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[-1]
-    assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=True, verbose=prop['verbose'])[0], 'Expansion error.'
     fname = fname[0:fname.find('.tar')]
     os.chdir(fname)
-    assert common.execCmd('python setup.py -f interproscan.properties', showcmd=False, verbose=True)[0], 'Initialization error.'
+    assert common.execCmd('python setup.py -f interproscan.properties', showcmd=True, verbose=prop['verbose'])[0], 'Initialization error.'
     os.chdir(os.environ['HYM_TEMP'])
-    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], 'interproscan')}", showcmd=False, verbose=True)[0], 'Initialization error.'
+    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], 'interproscan')}", showcmd=True, verbose=prop['verbose'])[0], 'Initialization error.'
     assert common.execCmd(f"rm interproscan*", showcmd=False, verbose=True)[0]
     print('Completed.')
     print('> ver.', checkVerInterPro())

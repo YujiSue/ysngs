@@ -6,31 +6,34 @@ import "gatk.wdl" as gatk
 workflow bwaalign {
     input {
         Array[String] fastq
-        Map[String, String] read_info
-        String ref_label
+        String read_info
+#        Map[String, String] read_info
+        String reference
         String out_dir
         String out_name
         Int thread
         Boolean clean
     }
-    call bwa.bwamap {
+    call bwa.bwamap as bwamap {
         input:
             fq = fastq,
-            read_info = read_info,
-            ref = ref_label,
+            info = read_info,
+            ref = reference,
+            dir =  out_dir,
+            name = out_name,
             thread = thread
     }
-    call samtools.sam2bam {
+    call samtools.sam2bam as sam2bam {
         input:
             sam = bwamap.sam,
             thread = thread
     }
-    call samtools.bamsort {
+    call samtools.bamsort as bamsort {
         input:
             bam = sam2bam.rawbam,
             thread = thread
     }
-    call gatk.markdp {
+    call gatk.markdp as markdp {
         input:
             bam = bamsort.sorted,
             dir = out_dir,

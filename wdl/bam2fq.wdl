@@ -4,13 +4,21 @@ workflow bam2fq {
     input {
         String bam
         String out_dir
+        Boolean paired
     }
-    call samtools.bam2fq {
-        input: 
-          bam = bam,
-          dir = out_dir
-    }
-    output {
-        String fq = bam2fq.fq
+    if (paired) {
+        call samtools.bam2fq {
+            input: 
+                bam = bam,
+                dir = out_dir
+        }
     } 
+    if (!paired) {
+        call samtools.bam2pair {
+            input: 
+                bam = bam,
+                dir = out_dir
+        }
+    }
+    output {} 
 }
