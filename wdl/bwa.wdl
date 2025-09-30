@@ -9,9 +9,11 @@ task bwamap {
         Int thread
     }
     command <<< 
+        mkdir -p ~{dir}
         $HYM_APP/bwa mem -t ~{thread} -Y -M \
           -R "@RG\t~{info}" \
-          ~{ref} ~{sep=" " fq} > ~{dir}/~{name}.bwa.sam
+          $HYM_REF/~{ref} \
+          ~{sep=" " fq} > ~{dir}/~{name}.bwa.sam
         echo ~{dir}/~{name}.bwa.sam
     >>>
     output {

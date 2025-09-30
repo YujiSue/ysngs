@@ -10,10 +10,10 @@ workflow bwaalign {
         String reference
         String out_dir
         String out_name
-        Int thread
-        Boolean? clean = true
+        Int thread = 2
+        Boolean clean = true
     }
-    call bwa.bwamap as bwamap {
+    call bwa.bwamap {
         input:
             fq = fastq,
             info = read_info,
@@ -22,21 +22,24 @@ workflow bwaalign {
             name = out_name,
             thread = thread
     }
-    call samtools.sam2bam as sam2bam {
+    call samtools.sam2bam {
         input:
             sam = bwamap.sam,
+            name = out_name,
             dir = out_dir,
             thread = thread
     }
-    call samtools.bamsort as bamsort {
+    call samtools.bamsort {
         input:
             bam = sam2bam.rawbam,
+            name = out_name,
             dir = out_dir,
             thread = thread
     }
-    call gatk.markdp as markdp {
+    call gatk.markdp {
         input:
             bam = bamsort.sorted,
+            name = out_name,
             dir = out_dir,
             name = out_name
     }
