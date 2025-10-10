@@ -1,23 +1,31 @@
 version 1.0
+
 task bwamap {
     input {
         Array[String] fq
-        String info
+        
+        Boolean rg = true
+        String? smplid = ""
+        String? sample = ""
+        String? library = ""
+        String? platform = ""
+        String readinfo = if rg then "-R \"@RG\\tID:~{smplid}\\tSM:~{sample}\\tLB:~{library}\\tPL:~{platform}\"" else ""
+
         String ref
         String dir
         String name
-        Int thread
+        String out = "~{dir}/~{name}.bwa.sam"
+        Int? thread = 2
     }
     command <<< 
         mkdir -p ~{dir}
         $HYM_APP/bwa mem -t ~{thread} -Y -M \
-          -R "@RG\t~{info}" \
-          $HYM_REF/~{ref} \
-          ~{sep=" " fq} > ~{dir}/~{name}.bwa.sam
-        echo ~{dir}/~{name}.bwa.sam
+          ~{readinfo} \
+          ~{ref} \
+          ~{sep=" " fq} > ~{out}
     >>>
     output {
-        String sam = read_string(stdout())
+        String sam = out
     }
 }
 task bwaindex {

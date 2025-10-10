@@ -1,55 +1,35 @@
 version 1.0
+
 task curldl {
     input {
         String url
         String out
     }
     command <<< 
-        curl -L -o ~{out} ~{url}
+        curl -L -o "~{out}" "~{url}"
     >>>
     output {
-        String dl = "~{out}"
-    }
-}
-task getpath {
-    input {
-        String dir
-        String out
-        String ext
-    }
-    command <<<
-        echo ~{dir}/~{out}.~{ext}
-    >>>
-    output {
-        String path = read_string(stdout())
-    }
-}
-task moveto {
-    input {
-        Array[String] ori
-        String dest
-    }
-    command <<< 
-        mv ~{sep=' ' ori} ~{dest}
-        echo ~{dest}
-    >>>
-    output {
-        String moved = read_string(stdout())
+        String dl = out
     }
 }
 task copyto {
     input {
-        String from
-        String to
+        Boolean copydir = false
+        String opt = if copydir then "-r" else "" 
+        String src
+        String dest
     }
     command <<< 
-        cp ~{from} ~{to}
+        cp ~{opt} ~{src} ~{dest}
     >>>
-    output {}
+    output {
+        String to = dest
+    }
 }
 task remove {
     input {
         Array[String] src
+        Array[String] exclude
     }
     command <<<
         rm -r ~{sep=' ' src}

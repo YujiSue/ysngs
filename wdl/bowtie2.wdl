@@ -1,51 +1,53 @@
 version 1.0
+# Mapping
 task bowtmap {
   input {
-    Array[File] fq
-    Map[String, String] read_info
+    Array[String] fq
+    Boolean paired
+    String f1 = if paired then "-1 ~{fq[0]}" else "-U ~{fq[0]}"
+    String f2 = if paired then "-2 ~{fq[1]}" else ""
+
+    String smplid
+    String sample
+    String library
+    String platform
+    
     String ref
+    
+    String dir
+    String name
+    String out = "~{dir}/~{name}.bowt.sam"
+
     Int thread
   }
   command <<< 
+    mkdir -p ~{dir}
     $HYM_APP/bowtie2/bowtie2 \
-    --rg-id ~{read_info['id']} \
-    --rg SM:~{read_info['sample']} \
-    --rg PL:~{read_info['platform']} \
-    -U ~{fq[0]} \
-    -p ~{thread} \
-    -x ~{ref} \
-    -S aligned.bowt.sam
+      -p ~{thread} \
+      --rg-id ~{smplid} \
+      --rg SM:~{sample} \
+      --rg LB:~{library} \
+      --rg PL:~{platform} \
+      ~{f1} \
+      ~{f2} \
+      -x ~{ref} \
+      -S ~{out}
   >>>
   output {
-    File sam = "aligned.bowt.sam"
+    String sam = out
   }
 }
-task bowtmap2 {
-  input {
-    Array[File] fq
-    Map[String, String] read_info
-    String ref
-    Int thread
-  }
-  command <<< 
-    bowtie2 --rg-id ~{read_info['id']} \
-    --rg SM:~{read_info['sample']} \
-    --rg PL:~{read_info['platform']} \
-    -1 ~{fq[0]} -2 ~{fq[1]} \
-    -p ~{thread} -x ~{ref} -S aligned.bowt.sam
-  >>>
-  output {
-    File sam = "aligned.bowt.sam"
-  }
-}
+# Make index
 task bowtindex {
     input {
-        File fa
+        String fa
         String label
-        Int thread
+        Int thread = 2
     }
     command <<< 
-        $HYM_APP/bowtie2/bowtie2-build --threads ~{thread} -f ~{fa} $HYM_REF/~{label}
+        cd $HYM_REF
+        $HYM_APP/bowtie2/bowtie2-build --threads ~{thread} -f ~{fa} ~{label}
+        cd $HYM_WS
     >>>
     output {}
 }

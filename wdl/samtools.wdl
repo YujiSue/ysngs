@@ -1,34 +1,37 @@
 version 1.0
+
 # BAM => single-read FASTQ
 task bam2fq {
     input {
+        String dir
+        Boolean paired
         String bam
         String name = basename(bam)
-        String dir
+        String out = "~{dir}/~{name}.fq"
     }
     command <<<
         mkdir -p ~{dir}
         samtools fastq ~{bam} > ~{dir}/~{name}.fq
-        echo ~{dir}/~{name}
     >>>
     output {
-        String fq = read_string(stdout())
+        String fq = out
     }
 }
 # BAM => paired-end FASTQ
 task bam2pair {
     input {
+        String dir
         String bam
         String name = basename(bam)
-        String dir
+        String out1 = "~{dir}/~{name}_1.fq"
+        String out2 = "~{dir}/~{name}_2.fq"
     }
     command <<<
         mkdir -p ~{dir}
-        samtools collate -u -O ~{bam} | samtools fastq -1 ~{dir}/~{name}_1.fq -2 ~{dir}/~{name}_2.fq -0 /dev/null -s /dev/null -n
-        ls ~{dir}/~{name}*.fq
+        samtools collate -u -O ~{bam} | samtools fastq -1 ~{out1} -2 ~{out2} -0 /dev/null -s /dev/null -n
     >>>
     output {
-        Array[String] fq = read_lines(stdout())
+        Array[String] fq = [out1, out2]
     }
 }
 # Make fasta index
@@ -38,10 +41,9 @@ task makefaidx {
     }
     command <<<
         samtools faidx ~{fa}
-        echo ~{fa}.fai
     >>>
     output {
-        String fai = read_string(stdout())
+        String fai = "~{fa}.fai"
     }
 }
 # SAM => BAM
@@ -50,39 +52,39 @@ task sam2bam {
         String sam
         String name = basename(sam)
         String dir
-        Int? thread = 2
+        String out = "~{dir}/~{name}.bam"
+        Int thread = 2
     }
     command <<<
         samtools view -@ ~{thread} \
-          -b -o ~{dir}/~{name}.raw.bam \
+          -b -o ~{out} \
           ~{sam} 
-        echo ~{dir}/~{name}.raw.bam
     >>>
     output {
-        String rawbam = read_string(stdout())
+        String rawbam = out
     }
 }
 # Sort reads by position
 task bamsort {
     input {
         String bam
-        String name = basename(bam)
         String dir
-        String? temp = ""
+        String name = basename(bam)
+        String out = "~{dir}/~{name}.bam"
+        String temp = ""
         String temp_opt = if temp == "" then "" else "-T ~{temp}"
-        Int? thread = 2
+        Int thread = 2
     }
     command <<<
         samtools sort -l1 \
           ~{temp_opt} \
           -@ ~{thread} \
           -O bam \
-          -o ~{dir}/~{name}.sorted.bam \
+          -o ~{out} \
           ~{bam}
-        echo ~{dir}/~{name}.sorted.bam
     >>>
     output {
-        String sorted = read_string(stdout())
+        String sorted = out
     }
 }
 # Make BAM index (.bai)
@@ -93,5 +95,27 @@ task makeindex {
     command <<<
         samtools index ~{bam}
     >>>
-    output {}
+    output {
+        String index = "~{bam}.bai"
+    }
+}
+# BCFtools variant call
+task bcfcall {
+    input {
+        String reference
+        String bam
+        String dir
+        String name = basename(bam)
+        String out = "~{dir}/~{name}.vcf"
+    }
+    command <<<
+        mkdir -p ~{dir}
+        bcftools mpileup -Ou \
+          -f ~{reference} \
+          ~{bam} | bcftools call -vm -Oz \
+          -o ~{out}
+    >>>
+    output {
+        String vcf = out
+    }
 }
