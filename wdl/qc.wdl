@@ -11,45 +11,57 @@ task fastqc {
     >>>
     output {}
 }
-
-task cutadapt1 {
-    input {
-        File fq
-        String dir
-    }
-    command <<<
-        cutadapt -b ATCACCGACTGCCCATAGAGAGGCTGAGAC ~{fq} > $HYM_DATA/~{dir}/$HYM_DATA/~{dir}/sub(basename(~{fq}), ".fq", ".cut.fq")
-        echo $HYM_DATA/~{dir}/sub(basename(~{fq}), ".fq", ".cut.fq")
-    >>>
-    output {
-        String cut = read_string(stdout())
-    }
-}
-task cutadapt2 {
+# Cutadapt (Old code. Use fastp)
+task cutadapt {
     input {
         Array[String] fq
+        Boolean paired
+
+        Boolean cut3end = true
+        String adapter3
+        String cut3 = if cut3end then (if paired then "-a ~{adapter3} -A ~{adapter3}" else "-a ~{adapter3}") else ""
+
+        Boolean cut5end = false
+        String adapter5 = ""
+        String cut5 = if cut5end then (if paired then "-g ~{adapter5} -G ~{adapter5}" else "-g ~{adapter5}") else ""
+
+        
         String dir
+        String name
+
+        String out1 = if paired then "-o ~{dir}/~{name}.cut_1.fq" else "-o ~{dir}/~{name}.cut.fq"
+        String out2 = if paired then "-p ~{dir}/~{name}.cut_2.fq" else ""
     }
     command <<<
-
+        cutadapt \
+          ~{cut3} \
+          ~{cut5} \
+          ~{out1} \
+          ~{out2} \
+          ~{sep=" " fq}          
+        ls ~{dir}/~{name}.cut*.fq
     >>>
     output {
-        String cut = read_string(stdout())
+        Array[String] cut = read_lines(stdout())
     }
 }
 # fastp
 task fastp {
     input {
         Boolean paired = false
+
         Array[String] fq
         String in1 = "-i ~{fq[0]}"
         String in2 = if paired then "-I ~{fq[1]}" else ""
+
         String dir
-        String out
-        String out1 = if paired then "-o ~{dir}/~{out}_1.fq" else "-o ~{dir}/~{out}.fq"
-        String out2 = if paired then "-O ~{dir}/~{out}_2.fq" else ""
-        String? option = ""
-        Int? thread = 2
+        String name
+        String out1 = if paired then "-o ~{dir}/~{name}_1.fq" else "-o ~{dir}/~{name}.fq"
+        String out2 = if paired then "-O ~{dir}/~{name}_2.fq" else ""
+        
+        
+        String option = ""
+        Int thread = 2
     }
     command <<<
         mkdir -p ~{dir}
@@ -59,56 +71,10 @@ task fastp {
           ~{in2} \
           ~{out1} \
           ~{out2} \
-          -h ~{dir}/~{out}.html \
-          -j ~{dir}/~{out}.json
-        ls ~{dir}/~{out}*.fq
+          -h ~{dir}/~{name}.html \
+          -j ~{dir}/~{name}.json
     >>>
     output {
-        Array[String] filtered = read_lines(stdout())
-    }
-}
-task fastp1 {
-    input {
-        Array[String] fq
-        String dir
-        String ext
-        Map[String, String] condition        
-    }
-    command <<<
-        fastp -i ~{fq[0]} \
-            -o ~{dir}/sub(basename(~{fq[0]}), ~{ext}, ".filtered.fq") \
-            -l ~{condition["min-len"]} \
-            -e ~{condition["min-qual"]} \
-            -f ~{condition["trim-head"]} \
-            -b ~{condition["trim-tail"]} \
-            -a ~{condition["cut-adapt"]} \
-            -h $HYM_DATA/~{dir}/sub(basename(~{fq[0]}), ~{ext}, ".html")
-        echo $HYM_DATA/~{dir}/sub(basename(~{fq[0]}), ~{ext}, ".filtered.fq")
-    >>>
-    output {
-        Array[String] qcfq = glob(read_string(stdout()))
-    }
-}
-task fastp2 {
-    input {
-        Array[String] fq
-        String dir
-        String ext
-        Map[String, String] condition        
-    }
-    command <<<
-        
-    >>>
-    output {}
-}
-task filteredfq {
-    input {
-        String dir
-    }
-    command <<<
-        echo $HYM_DATA/~{dir}/*.filtered.fq
-    >>>
-    output {
-        Array[String] filtered = glob(read_string(stdout()))
+        Array[String] filtered = [out1, out2]
     }
 }
