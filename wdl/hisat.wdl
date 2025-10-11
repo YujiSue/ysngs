@@ -2,103 +2,83 @@ version 1.0
 
 task hisatmap {
 	input {
-		Array[File] fq
-		String outdir
-		String out
+		Array[String] fq
+		Boolean paired
+		String f1 = if paired then "-1 ~{fq[0]}" else "-U ~{fq[0]}"
+		String f2 = if paired then "-2 ~{fq[1]}" else ""
+
 		String ref
+		
+		String dir
+		String name
+		String out = "~{dir}/~{bame}.hisat.sam"
+
 		Int thread
 	}
 	command <<<
-		$HYM_APP/hisat2/hisat2 -x $HYM_REF/HISAT/~{ref} -U ~{fq[0]} -p ~{thread} -S $HYM_DATA/~{outdir}/~{out}.hisat.sam
-		echo $HYM_DATA/~{outdir}/~{out}.hisat.sam
+		$HYM_APP/hisat2/hisat2 \
+		  -x ~{ref} \
+		  ~{f1} \
+		  ~{f2} \		  
+		  -p ~{thread} \
+		  -S ~{out}
 	>>>
 	output {
-		String sam = read_string(stdout())
+		String sam = out
 	}
 }
-task hisatmap2 {
-	input {
-		Array[File] fq
-		String outdir
-		String out
-		String ref
-		Int thread
-	}
-	command <<< 
-		$HYM_APP/hisat2/hisat2 -x $HYM_REF/HISAT/~{ref} -1 ~{fq[0]} -2 ~{fq[1]} -p ~{thread} -S $HYM_DATA/~{outdir}/~{out}.hisat.sam 
-		echo $HYM_DATA/~{outdir}/~{out}.hisat.sam
-	>>>
-	output {
-		String sam = read_string(stdout())
-	}
-}
-
+# Make suppl. data
 task hisatexon {
 	input {
-		File gtf
-		String label
-		Int thread
+		String gtf
+		String dir
+		String name
+		String out = "~{dir}/~{name}.exons.txt"
 	}
 	command <<< 
-		mkdir -p $HYM_REF/HISAT
-		mkdir -p $HYM_REF/HISAT/~{label}
-		python $HYM_APP/hisat2/scripts/hisat2_extract_exons.py ~{gtf}
+		mkdir -p ~{dir}/~{name}
+		python $HYM_APP/hisat2/scripts/hisat2_extract_exons.py ~{gtf} > ~{out}
 		
 	>>>
 	output {
-		String exons = read_string(stdout())
+		String exons = out
 	}
 }
 task hisatss {
 	input {
-		File gtf
-		String label
-		Int thread
+		String gtf
+		String dir
+		String name
+		String out = "~{dir}/~{name}.ss.txt"
 	}
 	command <<< 
-		mkdir -p $HYM_REF/HISAT
-		mkdir -p $HYM_REF/HISAT/~{label}
-		python $HYM_APP/hisat2/scripts/hisat2_extract_splice_sites.py ~{gtf}
-		
+		mkdir -p ~{dir}/~{name}
+		python $HYM_APP/hisat2/scripts/hisat2_extract_splice_sites.py ~{gtf} > ~{out}		
 	>>>
 	output {
-		String splices = read_string(stdout())
+		String ss = out
 	}
 }
+# make index
 task hisatindex {
 	input {
-		File fa
+		String fa
+		String gtf
+		String exons
+		String ss
+		String option = if rnaseq then "--exons ~{exons} --ss ~{ss}" else ""
+
+		String dir
 		String label
 		Int thread
 	}
 	command <<< 
-		mkdir -p $HYM_REF/HISAT
-		mkdir -p $HYM_REF/HISAT/~{label}
-		$HYM_APP/hisat2/hisat2-build -p ~{thread} ~{fa} $HYM_REF/HISAT/~{label}
-		echo $HYM_REF/HISAT/~{label}
+		mkdir -p ~{dir}/~{label}
+		$HYM_APP/hisat2/hisat2-build \
+		  -p ~{thread} \
+		  ~{option}
+		  ~{fa} \
+		  ~{dir}/~{label}
 	>>>
-	output {
-		String refdir = read_string(stdout())
-	}
-}
-task hisatindext {
-	input {
-		File fa
-		File gtf
-		String outdir
-		String label
-		Int thread
-	}
-	command <<< 
-		mkdir -p $HYM_REF/HISAT
-		mkdir -p $HYM_REF/HISAT/~{outdir}
-		python $HYM_APP/hisat2/scripts/hisat2_extract_exons.py ~{gtf}
-		python $HYM_APP/hisat2/scripts/hisat2_extract_splice_sites.py ~{gtf}
-		$HYM_APP/hisat2/hisat2-build -p ~{thread} ~{fa} $HYM_REF/HISAT/~{label}
-		
-		echo $HYM_REF/HISAT/~{label}
-	>>>
-	output {
-		String refdir = read_string(stdout())
-	}
+	output {}
 }
