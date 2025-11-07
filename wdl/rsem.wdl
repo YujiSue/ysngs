@@ -57,11 +57,12 @@ task rsemindex {
         Int thread
     }
     command <<< 
+        mkdir -p ~{dir}
         rsem-prepare-reference \
           --gtf ~{gtf} \
           --num-threads ~{thread} \
           ~{opt} \
-          ~{mapper} \            
+          ~{mapper} \
           ~{fa} \
           ~{dir}/~{label}
     >>>
