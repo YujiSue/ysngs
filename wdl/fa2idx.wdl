@@ -18,11 +18,11 @@ workflow fa2idx {
         Boolean use_rsem = false
         Boolean rsem_map = false
         
+        String out_dir
         String ref_fasta
         String ref_label
         String ref_gtf = ""
-        
-        Int thread  =2
+        Int thread = 2
     }
     call samtools.makefaidx {
         input:
@@ -78,6 +78,20 @@ workflow fa2idx {
                 gtf = ref_gtf,
                 exons = hisatexon.exons,
                 ss = hisatss.ss,
+                dir = out_dir,
+                label = ref_label,
+                thread = thread
+        }
+    }
+    if (use_rsem) {
+        call rsem.rsemindex {
+            input:
+                mapping = rsem_map,
+                use_bowtie = use_bowtie,
+		        use_star = use_star,
+		        use_hisat = use_hisat,
+                fa = ref_fasta,
+                gtf = ref_gtf,
                 dir = out_dir,
                 label = ref_label,
                 thread = thread
