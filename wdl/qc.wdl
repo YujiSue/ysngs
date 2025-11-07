@@ -56,8 +56,10 @@ task fastp {
 
         String dir
         String name
-        String out1 = if paired then "-o ~{dir}/~{name}_1.fq" else "-o ~{dir}/~{name}.fq"
-        String out2 = if paired then "-O ~{dir}/~{name}_2.fq" else ""
+        String f1 = if paired then "~{dir}/~{name}_1.fq" else "~{dir}/~{name}.fq"
+        String f2 = if paired then "~{dir}/~{name}_2.fq" else ""
+        String out1 = "-o ~{f1}"
+        String out2 = "-O ~{f2}"
         
         
         String option = ""
@@ -75,6 +77,6 @@ task fastp {
           -j ~{dir}/~{name}.json
     >>>
     output {
-        Array[String] filtered = [out1, out2]
+        Array[String] filtered = if paired then [f1] else [f1, f2]
     }
 }
