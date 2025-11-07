@@ -64,9 +64,9 @@ task hisatindex {
     input {
 		Boolean rnaseq = false
         String fa
-        String gtf
-        String exons
-        String ss
+        String gtf = ''
+        String exons = ''
+        String ss = ''
         String option = if rnaseq then "--exons ~{exons} --ss ~{ss}" else ""
 
         String dir

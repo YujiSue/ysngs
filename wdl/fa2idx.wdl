@@ -35,14 +35,6 @@ workflow fa2idx {
                 label = ref_label
         }
     }
-    if (use_bowtie) {
-        call bowtie2.bowtindex {
-            input:
-                fa = ref_fasta,
-                label = ref_label,
-                thread = thread
-        }
-    }
     if (use_gatk) {
         call gatk.gatkindex {
             input:
@@ -50,37 +42,32 @@ workflow fa2idx {
                 label = ref_label
         }
     }
-    if (use_star) {
-        call star.starindex {
-            input:
-                fa = ref_fasta,
-                gtf = ref_gtf,
-                dir = out_dir,
-                thread = thread
+    if (!use_rsem) {
+        if (use_bowtie) {
+            call bowtie2.bowtindex {
+                input:
+                    fa = ref_fasta,
+                    label = ref_label,
+                    thread = thread
+            }
         }
-    }
-    if (use_hisat) {
-        call hisat.hisatexon {
-            input:
-                gtf = ref_gtf,
-                dir = out_dir,
-                name = ref_label
+        if (use_star) {
+            call star.starindex {
+                input:
+                    fa = ref_fasta,
+                    gtf = ref_gtf,
+                    dir = out_dir,
+                    thread = thread
+            }
         }
-        call hisat.hisatss {
-            input:
-                gtf = ref_gtf,
-                dir = out_dir,
-                name = ref_label
-        }
-        call hisat.hisatindex {
-            input:
-                fa = ref_fasta,
-                gtf = ref_gtf,
-                exons = hisatexon.exons,
-                ss = hisatss.ss,
-                dir = out_dir,
-                label = ref_label,
-                thread = thread
+        if (use_hisat) {
+            call hisat.hisatindex {
+                input:
+                    fa = ref_fasta,
+                    dir = out_dir,
+                    label = ref_label,
+                    thread = thread
+            }
         }
     }
     if (use_rsem) {

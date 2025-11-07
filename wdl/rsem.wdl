@@ -45,9 +45,8 @@ task rsemindex {
 		Boolean use_bowtie = false
 		Boolean use_star = false
 		Boolean use_hisat = false
-		Boolean use_hisat_hca = false
 
-		String opt = if mapping then (if use_bowtie then "--bowtie2" else (if use_star then "--star" else (if use_hisat then "--hisat2" else ""))) else ""
+		String opt = if mapping then (if use_bowtie then "--bowtie2" else (if use_star then "--star" else (if use_hisat then "--hisat2-hca" else ""))) else ""
 		String mapper = if mapping then (if use_bowtie then "--bowtie2-path $HYM_APP/bowtie2" else (if use_star then "--star-path $HYM_APP/STAR/bin/Linux_x86_64" else (if use_hisat then "--hisat2-path $HYM_APP/hisat2" else ""))) else ""
 
 		String fa
