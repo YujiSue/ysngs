@@ -17,6 +17,7 @@ workflow fa2idx {
         Boolean use_hisat = false
         Boolean use_rsem = false
         Boolean rsem_map = false
+        String mapper_path = ''
         
         String out_dir
         String ref_fasta
@@ -74,6 +75,7 @@ workflow fa2idx {
         call rsem.rsemindex {
             input:
                 mapping = rsem_map,
+                mapper_path = mapper_path,
                 use_bowtie = use_bowtie,
 		        use_star = use_star,
 		        use_hisat = use_hisat,
