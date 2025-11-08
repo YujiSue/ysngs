@@ -10,6 +10,8 @@ workflow qcontrol {
 
         String out_name
         String out_dir
+
+        Int thread = 2
     }
     # Primary check
     scatter (fq in fastq) {
@@ -25,7 +27,8 @@ workflow qcontrol {
             paired = paired,
             fq = fastq,
             dir = out_dir + "/QC",
-            name = out_name
+            name = out_name,
+            thread = thread
     }
     # Final check
     scatter (fq in fastp.filtered) {

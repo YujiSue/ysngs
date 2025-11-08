@@ -56,11 +56,8 @@ task fastp {
 
         String dir
         String name
-        String f1 = if paired then "~{dir}/~{name}_1.fq" else "~{dir}/~{name}.fq"
-        String f2 = if paired then "~{dir}/~{name}_2.fq" else ""
-        String out1 = "-o ~{f1}"
-        String out2 = "-O ~{f2}"
-        
+        String out1 = if paired then "-o ~{dir}/~{name}_1.fq" else "-o ~{dir}/~{name}.fq"
+        String out2 = if paired then "-O ~{dir}/~{name}_2.fq" else ""
         
         String option = ""
         Int thread = 2
@@ -77,6 +74,6 @@ task fastp {
           -j ~{dir}/~{name}.json
     >>>
     output {
-        Array[String] filtered = if paired then [f1] else [f1, f2]
+        Array[String] filtered = if paired then ["~{dir}/~{name}_1.fq", "~{dir}/~{name}_2.fq"] else ["~{dir}/~{name}.fq"] 
     }
 }

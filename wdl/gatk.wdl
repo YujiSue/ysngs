@@ -8,7 +8,7 @@ task gatkindex {
     String label
   }
   command <<<
-    $HYM_APP/gatk/gatk CreateSequenceDictionary -R ~{fa} -O ~{refdir}/~{label} 
+    $HYM_APP/gatk/gatk CreateSequenceDictionary -R ~{fa} -O ~{refdir}/~{label}.dict
   >>>
   output {}
 }
