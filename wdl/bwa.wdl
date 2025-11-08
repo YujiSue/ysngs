@@ -31,10 +31,11 @@ task bwamap {
 task bwaindex {
     input {
         String fa
+        String dir
         String label
     }
     command <<< 
-        $HYM_APP/bwa index -p ~{label} ~{fa}
+        $HYM_APP/bwa index -p ~{dir}/~{label} ~{fa}
     >>>
     output {}
 }

@@ -33,6 +33,7 @@ workflow fa2idx {
         call bwa.bwaindex {
             input:
                 fa = ref_fasta,
+                dir = out_dir,
                 label = ref_label
         }
     }

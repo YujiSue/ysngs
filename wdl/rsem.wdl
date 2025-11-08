@@ -7,18 +7,20 @@ task rsemcount {
         Boolean use_star = false
         Boolean use_hisat = false
         Boolean export_bam = true
-        String interopt = if export_bam then "--keep-intermediate-files" else ""
+        String interopt = if export_bam then "--keep-intermediate-files --output-genome-bam" else ""
         
         Boolean mapping = false
-        String opt = if mapping then (if use_bowtie then "--bowtie2" else (if use_star then "--star" else (if use_hisat then "--hisat2" else ""))) else ""
+        String opt = if mapping then (if use_bowtie then "--bowtie2" else (if use_star then "--star" else (if use_hisat then "--hisat2-hca" else ""))) else "--alignments"
         String mapper = if mapping then (if use_bowtie then "--bowtie2-path $HYM_APP/bowtie2" else (if use_star then "--star-path $HYM_APP/STAR/bin/Linux_x86_64" else (if use_hisat then "--hisat2-path $HYM_APP/hisat2" else ""))) else ""
 
-        Array[String] fq
+        Array[String] fq = []
+        String bam = ""
         Boolean paired
         String type = if paired then "--paired-end" else ""
         String dir
         String name
         String ref
+        String out = "~{dir}/count/~{name}"
 
         Int thread = 2
     }
@@ -30,12 +32,16 @@ task rsemcount {
             ~{type} \
             ~{opt} \
             ~{mapper} \
-            ~{sep=" " fq} \
+            ~{bam}~{sep=" " fq} \
             ~{ref} \
-            ~{dir}/count/~{name}
+            ~{out}
+        rm -r ~{out}.temp
     >>>
     output {
-    
+        String tbam = "~{out}.transcript.bam"
+        String gbam = "~{out}.genome.bam"
+        String count = "~{out}.genes.results"
+        String count2 = "~{out}.isoforms.results"
     }
 }
 #
