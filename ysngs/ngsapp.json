@@ -298,22 +298,27 @@
 	},
 	"enrichment": {
 		"name": "R libraries for enrichment analysis",
+		"ver": "", 
 		"installer": "installEA" 
 	},
 	"rchart": {
 		"name": "R functions for chart", 
+		"ver": "", 
 		"installer": "installRChart" 
 	},
 	"humanDB": {
 		"name": "R annotation DB for human", 
+		"ver": "", 
 		"installer": "installRHumanGeneSet" 
 	},
 	"mouseDB": {
 		"name": "R annotation DB for mouse", 
+		"ver": "", 
 		"installer": "installRMouseGeneSet" 
 	},
 	"wormDB": {
 		"name": "R annotation DB for worm (C. elegans)", 
+		"ver": "", 
 		"installer": "installRWormGeneSet" 
 	},
 	"macs2": { 
