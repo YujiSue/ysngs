@@ -744,10 +744,31 @@ def installRSEM(prop):
     assert common.execCmd('make -j8', verbose=True)[0], 'Make error.'
     assert common.execCmd('sudo make install', verbose=True)[0], 'Install error.'
     os.chdir(os.environ['HYM_TEMP'])
-    assert common.execCmd('rm -r ./*')[0]
+    assert common.execCmd('rm -r ./RSEM*')[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerRSEM())
+
+# StringTie
+def checkStringTie():
+  return os.path.exists(os.path.join(os.environ['HYM_APP'], 'stringtie', 'stringtie'))
+def checkVerStringTie():
+  ret = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'stringtie', 'stringtie')} --version", showcmd=False)
+  assert ret[0], 'StringTie is not installed.'
+def installStringTie(prop):
+  if checkStringTie():
+    print('StringTie is installed.')
+  else:  
+    print('Install StringTie ...')
+    os.chdir(os.environ['HYM_TEMP'])
+    common.curlDownload(prop['url'])
+    fname = os.path.split(prop['url'])[-1]
+    assert common.execCmd(f"tar xvzf {fname}", showcmd=False)[0], 'Expansion error.'
+    fname = fname[0:fname.find('.tar')]
+    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], "stringtie")}")[0]
+    os.chdir(os.environ['HYM_WS'])
+    print('Completed.')
+    print('>ver.', checkVerStringTie())
 
 # BiocManager (R)
 def checkBM():

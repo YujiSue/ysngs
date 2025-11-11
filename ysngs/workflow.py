@@ -12,19 +12,19 @@ class WorkFlow:
         self.apps.install('cromwell')
 
   def run(self, input):
-    res = common.execCmd(f"java -jar $HYM_APP/cromwell.jar run --inputs {input} {self.script}", verbose=True)
+    res = common.execCmd(f"java -jar {os.path.join(os.environ['HYM_APP'], 'cromwell.jar')} run --inputs {input} {self.script}", verbose=True)
     assert res[0], (res[2] if res[1] == None else res[1])
   
   def prepare(self, path):
-    res = common.execCmd(f"java -jar $HYM_APP/womtool.jar inputs {self.script} > {path}", showcmd=False, verbose=True)
+    res = common.execCmd(f"java -jar {os.path.join(os.environ['HYM_APP'], 'womtool.jar')} inputs {self.script} > {path}", showcmd=False, verbose=True)
     assert res[0], (res[2] if res[1] == None else res[1])
 
   def check(self):
-    res = common.execCmd(f"java -jar $HYM_APP/womtool.jar validate {self.script}", showcmd=False, verbose=True)
+    res = common.execCmd(f"java -jar {os.path.join(os.environ['HYM_APP'], 'womtool.jar')} validate {self.script}", showcmd=False, verbose=True)
     assert res[0], (res[2] if res[1] == None else res[1])
 
   def graph(self, output, detailed = False):
-    assert common.execCmd(f"java -jar $HYM_APP/womtool.jar {'womgraph' if detailed else 'graph'} {self.script} > {output}", showcmd=False, verbose=True)[0]
+    assert common.execCmd(f"java -jar {os.path.join(os.environ['HYM_APP'], 'womtool.jar')} {'womgraph' if detailed else 'graph'} {self.script} > {output}", showcmd=False, verbose=True)[0]
     img = output.replace('.dot', '.png')
     assert common.execCmd(f"dot -Tpng {output} > {img}", showcmd=False, verbose=True)[0]
     print(f"Workflow image was exported to '{img}'")

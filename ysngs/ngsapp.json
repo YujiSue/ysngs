@@ -260,6 +260,14 @@
 		"verchecker": "checkVerRSEM", 
 		"installer": "installRSEM"
 	},
+	"stringtie": {
+		"name": "StringTie",
+		"ver": "2.2.3",
+		"url": "https://github.com/gpertea/stringtie/releases/download/v2.2.3/stringtie-2.2.3.Linux_x86_64.tar.gz",
+		"checker": "checkStringTie", 
+		"verchecker": "checkVerStringTie", 
+		"installer": "installStringTie"
+	},
 	"r-bioc": { 
 		"name": "BiocManager", 
 		"ver": "latest", 
