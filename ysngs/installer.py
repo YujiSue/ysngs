@@ -755,6 +755,8 @@ def checkStringTie():
 def checkVerStringTie():
   ret = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'stringtie', 'stringtie')} --version", showcmd=False)
   assert ret[0], 'StringTie is not installed.'
+  ver = ret[1].split()[-1]
+  return ver
 def installStringTie(prop):
   if checkStringTie():
     print('StringTie is installed.')
