@@ -21,7 +21,7 @@ class AppManager:
     def is_installed(self, name):
         return common.execFunc(installer, self.apps[name]['checker'])
     
-    def install(self, name, silent=False, ver=None):
+    def install(self, name, silent=True, ver=None):
         if name not in self.apps:
             print(f"{name} is not supported.")
         prop = self.apps[name]
