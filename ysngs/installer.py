@@ -152,7 +152,7 @@ def installSamtools(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=False, verbose=prop["verbose"])[0], 'Expansion error.'
     os.chdir(fname[0:fname.find('.tar')])
     assert common.execCmd('./configure', showcmd=True, verbose=prop["verbose"])[0], 'Configure error.'
     assert common.execCmd('make -j8', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
@@ -176,7 +176,7 @@ def installBCFtools(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"tar xvf {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"tar xvf {fname}", showcmd=False, verbose=prop["verbose"])[0], 'Expansion error.'
     os.chdir(fname[0:fname.find('.tar')])
     assert common.execCmd('./configure', showcmd=True, verbose=prop["verbose"])[0], 'Configure error.'
     assert common.execCmd('make -j8', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
@@ -217,7 +217,7 @@ def installGATK(prop):
     os.chdir(os.environ['HYM_TEMP'])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"unzip -o {fname}", showcmd=True)[0], 'Expansion error.'
+    assert common.execCmd(f"unzip -o {fname}", showcmd=True, verbose=prop["verbose"])[0], 'Expansion error.'
     assert common.execCmd(f"rm gatk*.zip", showcmd=True)[0]
     assert common.execCmd(f"mv gatk* {os.path.join(os.environ['HYM_APP'], 'gatk')}", showcmd=True)[0]
     os.chdir(os.environ['HYM_WS'])
@@ -256,7 +256,7 @@ def installFQC(prop):
     os.chdir(os.environ['HYM_TEMP'])
     assert common.curlDownload(prop['url'])[0], 'Download error.'
     fname = os.path.split(prop['url'])[1]
-    assert common.execCmd(f"unzip {fname}", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"unzip {fname}", showcmd=False, verbose=prop["verbose"])[0], 'Expansion error.'
     assert common.execCmd('mv FastQC $HYM_APP', showcmd=True)[0], 'File move error.'
     assert common.execCmd('chmod a+x $HYM_APP/FastQC/fastqc', showcmd=True, verbose=prop['verbose'])[0], 'Permission setting error.'
     assert common.execCmd('rm ./fastqc*', showcmd=False)[0]
@@ -277,7 +277,7 @@ def installFP(prop):
   else:
     print('Install fastp  ...')
     assert common.curlDownload(prop['url'], '$HYM_APP/fastp')[0], 'Download error.'
-    assert common.execCmd('chmod a+x $HYM_APP/fastp', showcmd=True, verbose=prop['verbose'])[0], 'Permission setting error.'
+    assert common.execCmd('chmod a+x $HYM_APP/fastp', showcmd=True, verbose=False)[0], 'Permission setting error.'
     print('Completed.')
     print('>ver.', checkVerFP())
 

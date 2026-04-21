@@ -12,6 +12,30 @@ task curldl {
         String dl = out
     }
 }
+task makelist {
+    input {
+        String target
+        String out
+    }
+    command <<<
+        ls ~{target} > ~{out}
+    >>>
+    output {
+        String list = out
+    }
+}
+task concat {
+    input {
+        Array[String] files
+        String out
+    }
+    command <<<
+        cat ~{sep=" " files} > ~{out}
+    >>>
+    output {
+        String concat = out
+    }
+}
 task copyto {
     input {
         Boolean copydir = false
