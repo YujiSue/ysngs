@@ -4,18 +4,18 @@ import platform
 from ysngs import common
 # Config class
 class Config :
-  def __init__(self, prefx='/'):
+  def __init__(self, prefix=''):
     # Get/make the workspace path
     pl = platform.system()
     cfgdir = ''
     if pl == 'Linux':
-      cfgdir = f'{prefx}.etc/hayami'
+      cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Darwin':
-      cfgdir = f'{prefx}.etc/hayami'
+      cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Windows':
-      if prefx == '/':
-        prefx = 'C:\\'
-      cfgdir = f'{prefx}ProgramData'
+      if prefix == '':
+        prefix = 'C:'
+      cfgdir = f'{prefix}\\ProgramData'
     if not os.path.exists(cfgdir):
       os.makedirs(cfgdir, exist_ok=True)
     cfgpath = os.path.join(cfgdir, 'ysngs.cfg.json')
