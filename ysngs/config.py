@@ -4,16 +4,18 @@ import platform
 from ysngs import common
 # Config class
 class Config :
-  def __init__(self):
+  def __init__(self, prefx='/'):
     # Get/make the workspace path
     pl = platform.system()
     cfgdir = ''
     if pl == 'Linux':
-      cfgdir = '/etc/hayami'
+      cfgdir = f'{prefx}.etc/hayami'
     elif pl == 'Darwin':
-      cfgdir = '/etc/hayami'
+      cfgdir = f'{prefx}.etc/hayami'
     elif pl == 'Windows':
-      cfgdir = 'C:\\ProgramData'
+      if prefx == '/':
+        prefx = 'C:\\'
+      cfgdir = f'{prefx}ProgramData'
     if not os.path.exists(cfgdir):
       os.makedirs(cfgdir, exist_ok=True)
     cfgpath = os.path.join(cfgdir, 'ysngs.cfg.json')
@@ -23,17 +25,17 @@ class Config :
     else:
       ws = os.getcwd()
       self.cfg = {
-          'workspace': ws,
-          'dirs': {
-              'app': os.path.join(ws, 'MyApp'),
-              'ref': os.path.join(ws, 'Reference'),
-              'pref': os.path.join(ws, 'Preference'),
-              'db': os.path.join(ws, 'DB'),
-              'data': os.path.join(ws, 'Data'),
-              'script': os.path.join(ws, 'Script'),
-              'tmp': os.path.join(ws, 'Temp'),
-              'log': os.path.join(ws, 'Log')
-          }
+        'workspace': ws,
+        'dirs': {
+            'app': os.path.join(ws, 'MyApp'),
+            'ref': os.path.join(ws, 'Reference'),
+            'pref': os.path.join(ws, 'Preference'),
+            'db': os.path.join(ws, 'DB'),
+            'data': os.path.join(ws, 'Data'),
+            'script': os.path.join(ws, 'Script'),
+            'tmp': os.path.join(ws, 'Temp'),
+            'log': os.path.join(ws, 'Log')
+        }
       }
       json.dump(self.cfg, open(cfgpath, 'w'))
   # 
