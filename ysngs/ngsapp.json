@@ -15,6 +15,14 @@
 		"installer": "installSutoku", 
 		"url" : "https://github.com/YujiSue/Sutoku.git"
 	},
+	"java": {
+		"name": "Java",
+		"ver": "17.x",
+		"checker": "checkJava",
+		"verchecker": "checkVerJava",
+		"installer": "installJava",
+		"url" : []
+	},
 	"cromwell": {
 		"name": "Cromwell", 
 		"ver": "86", 

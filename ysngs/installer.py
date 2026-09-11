@@ -9,7 +9,7 @@ def checkMoirei():
 def checkVerMoirei():
   res = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'bin', 'moirei')} --version", showcmd=False)
   return res[1]
-def installMoirei(silent=False):
+def installMoirei(prop):
   if checkMoirei():
     print('moirei is installed.')
   else:
@@ -17,9 +17,9 @@ def installMoirei(silent=False):
     os.chdir(os.environ['HYM_TEMP'])
     common.gitClone(prop['url'])
     os.chdir('Moirei')
-    assert common.execCmd(f"cmake -DINSTALL_SLIB=ON -S . -B build", showcmd=False, verbose=(not silent))[0], "Failed to cmake configure."
-    assert common.execCmd(f"cmake --build build", showcmd=False, verbose=(not silent))[0], "Failed to build."
-    assert common.execCmd(f"cmake --install build --prefix {os.environ['HYM_APP']}", showcmd=False, verbose=(not silent))[0], "Failed to build."
+    assert common.execCmd(f"cmake -DINSTALL_SLIB=ON -S . -B build", showcmd=False, verbose=True)[0], "Failed to cmake configure."
+    assert common.execCmd(f"cmake --build build", showcmd=False, verbose=True)[0], "Failed to build."
+    assert common.execCmd(f"cmake --install build --prefix {os.environ['HYM_APP']}", showcmd=False, verbose=True)[0], "Failed to build."
     print('Completed.')
     print('> ver.', checkVerMoirei())
 
@@ -42,6 +42,26 @@ def installSutoku(prop):
     assert common.execCmd(f"cmake --install build --prefix {os.environ['HYM_APP']}", showcmd=False, verbose=True)[0], "Failed to build."
     print('Completed.')
     print('> ver.', checkVerSutoku())
+
+
+# Java
+def checkJava():
+  res = common.execCmd('java -version', showcmd=False)
+  return res[0]
+def checkVerJava():
+  res = common.execCmd('java -version', showcmd=False)
+  assert res[0], 'Java is not installed.'
+  ver = res[2].split('\n')[0]
+  return ver
+def installJava(prop):
+  if checkJava():
+    print('Java is installed.')
+  else:
+    print('Install Java ...')
+    common.execCmd(f"sudo apt update")
+    assert common.execCmd(f"sudo apt install -y openjdk-17-jdk"), "Failed to install Java."
+    print('Completed.')
+    print('> ver.', checkVerJava())
     
 # Cromwell
 def checkCromwell():
