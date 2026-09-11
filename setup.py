@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='ysngs',
-    version='0.2.1',
+    version='0.2.2',
     author='Yuji Suehiro',
     packages=find_packages(),
     package_data={'': ['ngsapp.json']},
