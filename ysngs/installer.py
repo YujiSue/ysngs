@@ -60,6 +60,7 @@ def installJava(prop):
     print('Install Java ...')
     common.execCmd(f"sudo apt update")
     assert common.execCmd(f"sudo apt install -y openjdk-17-jdk"), "Failed to install Java."
+    common.execCmd(f"update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java")
     print('Completed.')
     print('> ver.', checkVerJava())
     

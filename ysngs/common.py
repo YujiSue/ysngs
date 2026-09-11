@@ -2,7 +2,6 @@ import os
 import json
 import importlib
 import subprocess
-import plotly.io as pio
 from ysngs import installer
 
 def checkEnv(key):
