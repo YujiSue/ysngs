@@ -235,7 +235,13 @@
 		"verchecker": "checkVerHLAHD", 
 		"installer": "installHLAHD"
 	},
-	
+	"R": { 
+		"name": "R", 
+		"ver": "latest", 
+		"checker": "checkR", 
+		"verchecker": "checkVerR", 
+		"installer": "installR"
+	},
 	"htseq": { 
 		"name": "HTSeq", 
 		"ver": "latest", 

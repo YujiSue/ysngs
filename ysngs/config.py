@@ -7,21 +7,21 @@ class Config :
   def __init__(self, prefix=''):
     # Get/make the workspace path
     pl = platform.system()
-    cfgdir = ''
+    self.cfgdir = ''
     if pl == 'Linux':
       cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Darwin':
-      cfgdir = f'{prefix}/.etc/hayami'
+      self.cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Windows':
       if prefix == '':
         prefix = 'C:'
-      cfgdir = f'{prefix}\\ProgramData'
-    if not os.path.exists(cfgdir):
-      os.makedirs(cfgdir, exist_ok=True)
-    cfgpath = os.path.join(cfgdir, 'ysngs.cfg.json')
+      self.cfgdir = f'{prefix}\\ProgramData'
+    if not os.path.exists(self.cfgdir):
+      os.makedirs(self.cfgdir, exist_ok=True)
+    self.cfgpath = os.path.join(self.cfgdir, 'ysngs.cfg.json')
     self.cfg = {}
-    if os.path.exists(cfgpath):
-      self.cfg = json.load(open(cfgpath))
+    if os.path.exists(self.cfgpath):
+      self.cfg = json.load(open(self.cfgpath))
     else:
       ws = os.getcwd()
       self.cfg = {
@@ -37,8 +37,11 @@ class Config :
             'log': os.path.join(ws, 'Log')
         }
       }
-      json.dump(self.cfg, open(cfgpath, 'w'))
-  # 
+      json.dump(self.cfg, open(self.cfgpath, 'w'))
+  #
+  def update(self):
+    json.dump(self.cfg, open(self.cfgpath, 'w'))
+  #
   def makeDirs(self):
     os.makedirs(self.cfg['workspace'], exist_ok=True)
     os.makedirs(self.cfg['dirs']['app'], exist_ok=True)

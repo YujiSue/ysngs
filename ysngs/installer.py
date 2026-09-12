@@ -1,6 +1,7 @@
 import os
 import subprocess
-from subprocess import PIPE 
+from subprocess import PIPE
+from turtle import update 
 from ysngs import common
 
 # Moirei
@@ -171,6 +172,8 @@ def installSamtools(prop):
   else:
     print('Install Samtools...')
     os.chdir(os.environ['HYM_TEMP'])
+    common.execCmd('sudo apt-get update', showcmd=False, verbose=prop["verbose"])
+    common.execCmd('sudo apt-get install -y libncurses-dev zlib1g-dev libbz2-dev liblzma-dev', showcmd=False, verbose=prop["verbose"])
     common.curlDownload(prop['url'])
     fname = os.path.split(prop['url'])[1]
     assert common.execCmd(f"tar xvf {fname}", showcmd=False, verbose=prop["verbose"])[0], 'Expansion error.'
@@ -684,7 +687,30 @@ def installInterPro(prop):
     assert common.execCmd(f"rm interproscan*", showcmd=False, verbose=True)[0]
     print('Completed.')
     print('> ver.', checkVerInterPro())
-  
+
+# R
+def checkR():
+  ret = common.execCmd('which R', showcmd=False)
+  return ret[0] and os.path.exists(ret[1].strip())
+def checkVerR():
+  ret = common.execCmd('R --version', showcmd=False)
+  assert ret[0], 'R is not installed.'
+  ver = ret[1].splitlines()[0].split()[2]
+  return ver
+def installR(prop):
+  if checkR():
+    print('R is installed.')
+  else:
+    print('Install R ...')
+    assert common.execCmd('sudo apt-get update', showcmd=False)[0]
+    assert common.execCmd('sudo apt install --no-install-recommends ubuntu-keyring ca-certificates apt-transport-https software-properties-common', showcmd=False)[0]
+    assert common.execCmd('wget -qO- https://r-project.org | sudo tee /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc', showcmd=False)[0]
+    assert common.execCmd('sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"', showcmd=False)[0]
+    assert common.execCmd('sudo apt update', showcmd=False)[0]
+    assert common.execCmd('sudo apt install r-base r-base-dev', showcmd=False)[0], 'Install error.'
+    print('Completed.')
+    print('>ver.', checkVerR())
+
 # HTSeq
 def checkHTSeq():
   ret = common.execCmd('which htseq-count', showcmd=False)
