@@ -59,9 +59,9 @@ def installJava(prop):
     print('Java is installed.')
   else:
     print('Install Java ...')
-    common.execCmd(f"sudo apt update")
-    assert common.execCmd(f"sudo apt install -y openjdk-17-jdk"), "Failed to install Java."
-    common.execCmd(f"update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java")
+    assert common.execCmd(f"sudo apt update")[0]
+    assert common.execCmd(f"sudo apt install -y openjdk-17-jdk")[0], "Failed to install Java."
+    assert common.execCmd(f"update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java")[0]
     print('Completed.')
     print('> ver.', checkVerJava())
     
@@ -79,6 +79,10 @@ def checkVerWom():
   #return res[1].split(' ')[-1]
   return res[1]
 def installCromwell(prop):
+  if not checkJava():
+    installJava(prop)
+  assert common.execCmd(f"sudo apt update")[0]
+  assert common.execCmd(f"sudo apt install -y graphviz")[0]
   if checkCromwell():
     print('Cromwell is installed.')
   else:
@@ -372,7 +376,8 @@ def installSTAR(prop):
     os.chdir(os.path.join(fname, 'source'))
     assert common.execCmd('make -j8 STAR', showcmd=True, verbose=prop["verbose"])[0], 'Make error.'
     os.chdir(os.environ['HYM_TEMP'])
-    assert common.execCmd(f"mv {fname} {os.path.join(os.environ['HYM_APP'], 'STAR')}", showcmd=True)[0]
+    os.makedirs(os.path.join(os.environ['HYM_APP'], 'STAR'), exist_ok=True)
+    assert common.execCmd(f"mv {fname}/bin/Linux_x86_64_static/* {os.path.join(os.environ['HYM_APP'], 'STAR')}", showcmd=True)[0]
     assert common.execCmd('rm -r ./*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
