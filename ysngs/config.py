@@ -9,7 +9,7 @@ class Config :
     pl = platform.system()
     self.cfgdir = ''
     if pl == 'Linux':
-      cfgdir = f'{prefix}/.etc/hayami'
+      self.cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Darwin':
       self.cfgdir = f'{prefix}/.etc/hayami'
     elif pl == 'Windows':
