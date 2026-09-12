@@ -329,7 +329,7 @@ def installBWA(prop):
     common.execCmd(f"sed -i 's/const uint8_t rle_auxtab/extern const uint8_t rle_auxtab/g' rle.h", showcmd=True, verbose=prop['verbose'])
     assert common.execCmd('make -j8', showcmd=True, verbose=prop['verbose'])[0], 'Make error.'
     assert common.execCmd('cp bwa $HYM_APP', showcmd=True, verbose=prop['verbose'])[0], 'File copy error.'
-    assert common.execCmd(f"rm -r {os.path.join(os.environ['HYM_TEMP'], '*')}", showcmd=False)[0]
+    assert common.execCmd(f"rm -r {os.path.join(os.environ['HYM_TEMP'], 'bwa*')}", showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('> ver.', checkVerBWA())
@@ -352,7 +352,7 @@ def installBowtie(prop):
     assert common.execCmd(f"unzip -o {fname}", showcmd=True)[0], 'Expansion error.'
     fname = fname[0:fname.find('.zip')]
     assert common.execCmd(f"mv {fname} $HYM_APP/bowtie2", showcmd=True)[0], 'Make error.'
-    assert common.execCmd('rm -r ./*', showcmd=False)[0]
+    assert common.execCmd('rm -r ./bowtie2*', showcmd=False)[0]
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerBowtie())
@@ -823,6 +823,28 @@ def installStringTie(prop):
     os.chdir(os.environ['HYM_WS'])
     print('Completed.')
     print('>ver.', checkVerStringTie())
+
+# Cell Ranger
+def checkCellRanger():
+  return os.path.exists(os.path.join(os.environ['HYM_APP'], 'cellranger', 'cellranger'))
+def checkVerCellRanger():
+  ret = common.execCmd(f"{os.path.join(os.environ['HYM_APP'], 'cellranger', 'cellranger')} --version", showcmd=False)
+  assert ret[0], 'Cell Ranger is not installed.'
+  ver = ret[1].split()[-1]
+  return ver
+def installCellRanger(prop):
+  if checkCellRanger():
+    print('Cell Ranger is installed.')
+  else:  
+    print('Install Cell Ranger ...')
+    fname = f'cellranger-{prop["ver"]}'
+    assert common.execCmd(f"cp {os.path.join(os.environ['HYM_TEMP'], fname)}.tar.gz {os.environ['HYM_APP']}")[0]
+    os.chdir(os.environ['HYM_APP'])
+    assert common.execCmd(f"tar xvzf {fname}.tar.gz", showcmd=False)[0], 'Expansion error.'
+    assert common.execCmd(f"mv {fname} cellranger")[0]
+    os.chdir(os.environ['HYM_WS'])
+    print('Completed.')
+    print('>ver.', checkVerCellRanger())
 
 # BiocManager (R)
 def checkBM():
