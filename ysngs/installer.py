@@ -59,9 +59,9 @@ def installJava(prop):
     print('Java is installed.')
   else:
     print('Install Java ...')
-    assert common.execCmd(f"sudo apt update")[0]
-    assert common.execCmd(f"sudo apt install -y openjdk-17-jdk")[0], "Failed to install Java."
-    assert common.execCmd(f"update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java")[0]
+    assert common.execCmd(f"sudo apt update", showcmd=False)[0]
+    assert common.execCmd(f"sudo apt install -y openjdk-17-jdk", showcmd=False)[0], "Failed to install Java."
+    assert common.execCmd(f"update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java", showcmd=False)[0]
     print('Completed.')
     print('> ver.', checkVerJava())
     
@@ -81,12 +81,12 @@ def checkVerWom():
 def installCromwell(prop):
   if not checkJava():
     installJava(prop)
-  assert common.execCmd(f"sudo apt update")[0]
-  assert common.execCmd(f"sudo apt install -y graphviz")[0]
   if checkCromwell():
     print('Cromwell is installed.')
   else:
     print('Install cromwell ...')
+    assert common.execCmd(f"sudo apt update", showcmd=False)[0]
+    assert common.execCmd(f"sudo apt install -y graphviz", showcmd=False)[0]
     common.curlDownload(prop['url'][0], output=os.path.join(os.environ['HYM_APP'], 'cromwell.jar'))
     print('Completed.')
     print('> ver.', checkVerCromwell())
@@ -361,7 +361,7 @@ def installBowtie(prop):
 def checkSTAR():
   return os.path.exists(os.path.join(os.environ['HYM_APP'], 'STAR'))
 def checkVerSTAR():
-  res = common.execCmd(os.path.join(os.environ['HYM_APP'], 'STAR | grep version'), showcmd=False)
+  res = common.execCmd(os.path.join(os.environ['HYM_APP'], 'STAR', 'STAR | grep version'), showcmd=False)
   return res[1].split('=')[-1]
 def installSTAR(prop):
   if checkSTAR():
@@ -692,29 +692,6 @@ def installInterPro(prop):
     assert common.execCmd(f"rm interproscan*", showcmd=False, verbose=True)[0]
     print('Completed.')
     print('> ver.', checkVerInterPro())
-
-# R
-def checkR():
-  ret = common.execCmd('which R', showcmd=False)
-  return ret[0] and os.path.exists(ret[1].strip())
-def checkVerR():
-  ret = common.execCmd('R --version', showcmd=False)
-  assert ret[0], 'R is not installed.'
-  ver = ret[1].splitlines()[0].split()[2]
-  return ver
-def installR(prop):
-  if checkR():
-    print('R is installed.')
-  else:
-    print('Install R ...')
-    assert common.execCmd('sudo apt-get update', showcmd=False)[0]
-    assert common.execCmd('sudo apt install --no-install-recommends ubuntu-keyring ca-certificates apt-transport-https software-properties-common', showcmd=False)[0]
-    assert common.execCmd('wget -qO- https://r-project.org | sudo tee /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc', showcmd=False)[0]
-    assert common.execCmd('sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"', showcmd=False)[0]
-    assert common.execCmd('sudo apt update', showcmd=False)[0]
-    assert common.execCmd('sudo apt install r-base r-base-dev', showcmd=False)[0], 'Install error.'
-    print('Completed.')
-    print('>ver.', checkVerR())
 
 # HTSeq
 def checkHTSeq():

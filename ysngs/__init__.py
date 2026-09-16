@@ -8,3 +8,4 @@ from ysngs.common import (
 from ysngs.config import Config
 from ysngs.appmanager import AppManager
 from ysngs.workflow import WorkFlow
+from ysngs.prepare import preparInput

@@ -235,13 +235,6 @@
 		"verchecker": "checkVerHLAHD", 
 		"installer": "installHLAHD"
 	},
-	"R": { 
-		"name": "R", 
-		"ver": "latest", 
-		"checker": "checkR", 
-		"verchecker": "checkVerR", 
-		"installer": "installR"
-	},
 	"htseq": { 
 		"name": "HTSeq", 
 		"ver": "latest", 
@@ -281,6 +274,13 @@
 		"checker": "checkStringTie", 
 		"verchecker": "checkVerStringTie", 
 		"installer": "installStringTie"
+	},
+	"cellranger": { 
+		"name": "Cell Ranger", 
+		"ver": "10.1.0", 
+		"checker": "checkCellRanger", 
+		"verchecker": "checkVerCellRanger", 
+		"installer": "installCellRanger" 
 	},
 	"r-bioc": { 
 		"name": "BiocManager", 

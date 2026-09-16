@@ -7,6 +7,7 @@ import "gatk.wdl" as gatk
 import "star.wdl" as star
 import "hisat.wdl" as hisat
 import "rsem.wdl" as rsem
+import "cellranger.wdl" as cr
 # 
 workflow fa2idx {
     input {
@@ -16,6 +17,7 @@ workflow fa2idx {
         Boolean use_star = false
         Boolean use_hisat = false
         Boolean use_rsem = false
+        Boolean use_cr = false
         Boolean rsem_map = false
         String mapper_path = ''
         
@@ -85,6 +87,14 @@ workflow fa2idx {
                 dir = out_dir,
                 label = ref_label,
                 thread = thread
+        }
+    }
+    if (use_cr) {
+        call cr.scmkref {
+            input:
+                fasta = ref_fasta,
+                gtf = ref_gtf,
+                out = "~{out_dir}/~{ref_label}"
         }
     }
 }
