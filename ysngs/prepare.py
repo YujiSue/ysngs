@@ -31,7 +31,7 @@ def prepare_input_dlfq(prop):
     for file_id in prop['ids']:
         input_data.append({
             "dlfq.data_id": file_id,
-            "dlfq.split_file": prop['split'],
+            "dlfq.split": prop['split'],
             "dlfq.out_dir": os.path.join(os.environ['HYM_DATA'], prop['out_dir']),
             "dlfq.thread": prop['thread']
         })
