@@ -3,12 +3,46 @@ import json
 import datetime
 import pandas as pd
 
+def makeInputPath(prefix):
+  now = datetime.datetime.now()
+  return os.path.join(os.environ['HYM_LOG'], f"{prefix}_{now.strftime('%Y-%m-%d')}.json")
+
 def preparInput(script, prop):
-    if script == 'scrnaseq':
-        return prepare_input_scrnaseq(prop)
-    else:
-        print(f"Error: Unsupported script '{script}'")
-        return None
+  if script == 'dlfq':
+    return prepare_input_dlfq(prop)
+  if script == 'scrnaseq':
+    return prepare_input_scrnaseq(prop)
+  else:
+    print(f"Error: Unsupported script '{script}'")
+    return None
+
+# Download data from sequence archive
+def prepare_input_dlfq(prop):
+    ## Set path
+    input_data_path = makeInputPath('dlfq')
+    input_data = []
+    ## Set IDs
+    if 'ids' not in prop:
+        prop['ids'] = []
+    if 'list' in prop and os.path.exists(prop['list']):
+        df = pd.read_csv(os.path.join(os.environ['HYM_DATA'], list), header=None)
+        prop['ids'].extend(df.iloc[:, 0].tolist())
+    ## Set input 
+    for file_id in prop['ids']:
+        input_data.append({
+            "dlfq.data_id": file_id,
+            "dlfq.split_file": prop['split'],
+            "dlfq.out_dir": os.path.join(os.environ['HYM_DATA'], prop['out_dir']),
+            "dlfq.thread": prop['thread']
+        })
+    ## Save input data to JSON
+    json.dump(input_data, open(input_data_path, 'w'))
+    ## Return input path
+    return input_data_path
+
+# 
+
+
 
 # scRNA-seq input preparation
 def prepare_input_scrnaseq(prop):

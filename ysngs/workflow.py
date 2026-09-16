@@ -2,6 +2,7 @@ import os
 import json
 from ysngs import common
 from ysngs import appmanager
+
 # WorkFlow class
 class WorkFlow:
   def __init__(self, script, opts = {}):
