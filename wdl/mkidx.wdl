@@ -94,7 +94,8 @@ workflow mkidx {
             input:
                 fasta = ref_fasta,
                 gtf = ref_gtf,
-                out = "~{out_dir}/~{ref_label}"
+                dir = out_dir,
+                label = ref_label
         }
     }
 }

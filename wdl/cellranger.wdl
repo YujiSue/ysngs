@@ -61,7 +61,9 @@ task scmkref {
     input {
         String fasta
         String gtf
-        String out
+        String dir
+        String label
+        String out = "~{dir}/~{label}"
     }
     command <<<
         cellranger mkref \
