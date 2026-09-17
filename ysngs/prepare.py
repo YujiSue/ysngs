@@ -10,6 +10,8 @@ def makeInputPath(prefix):
 def preparInput(script, prop):
   if script == 'dlfq':
     return prepare_input_dlfq(prop)
+  if script == 'mkidx':
+    return prepare_input_mkidx(prop)
   if script == 'scrnaseq':
     return prepare_input_scrnaseq(prop)
   else:
@@ -40,9 +42,32 @@ def prepare_input_dlfq(prop):
     ## Return input path
     return input_data_path
 
-# 
-
-
+# Make index file(s)
+def prepare_input_mkidx(prop):
+    ## Set path
+    input_data_path = makeInputPath('dlfq')
+    input_data = []
+    ## Select apps
+    input_data.append({
+        "mkidx.use_hts": prop['use_hts'],
+        "mkidx.use_bwa": prop['use_bwa'],
+        "mkidx.use_bowtie": prop['use_bowtie'],
+        "mkidx.use_gatk": prop['use_gatk'],
+        "mkidx.use_star": prop['use_star'],
+        "mkidx.use_hisat": prop['use_hisat'],
+        "mkidx.use_rsem": prop['use_rsem'],
+        "mkidx.use_cr": prop['use_cr'],
+        "mkidx.out_dir": prop["out_dir"],
+        "mkidx.ref_fasta": prop["fasta"],
+        "mkidx.ref_gtf": prop["gtf"],
+        "mkidx.ref_label": prop["name"],
+        "mkidx.mapper_path": prop["app_path"],
+        "mkidx.thread": prop["thread"]
+    })
+    ## Save input data to JSON
+    json.dump(input_data, open(input_data_path, 'w'))
+    ## Return input path
+    return input_data_path
 
 # scRNA-seq input preparation
 def prepare_input_scrnaseq(prop):

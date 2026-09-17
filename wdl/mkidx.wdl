@@ -9,8 +9,9 @@ import "hisat.wdl" as hisat
 import "rsem.wdl" as rsem
 import "cellranger.wdl" as cr
 # 
-workflow fa2idx {
+workflow mkidx {
     input {
+        Boolean use_hts = false
         Boolean use_bwa = false
         Boolean use_bowtie = false
         Boolean use_gatk = false
@@ -18,18 +19,19 @@ workflow fa2idx {
         Boolean use_hisat = false
         Boolean use_rsem = false
         Boolean use_cr = false
-        Boolean rsem_map = false
-        String mapper_path = ''
         
         String out_dir
         String ref_fasta
         String ref_label
+        String mapper_path = ""
         String ref_gtf = ""
         Int thread = 2
     }
-    call samtools.makefaidx {
-        input:
-            fa = ref_fasta
+    if (use_hts) {
+        call samtools.makefaidx {
+            input:
+                fa = ref_fasta
+        }
     }
     if (use_bwa) {
         call bwa.bwaindex {
@@ -46,32 +48,30 @@ workflow fa2idx {
                 label = ref_label
         }
     }
-    if (!use_rsem) {
-        if (use_bowtie) {
-            call bowtie2.bowtindex {
-                input:
-                    fa = ref_fasta,
-                    label = ref_label,
-                    thread = thread
-            }
+    if (use_bowtie) {
+        call bowtie2.bowtindex {
+            input:
+                fa = ref_fasta,
+                label = ref_label,
+                thread = thread
         }
-        if (use_star) {
-            call star.starindex {
-                input:
-                    fa = ref_fasta,
-                    gtf = ref_gtf,
-                    dir = out_dir,
-                    thread = thread
-            }
+    }
+    if (use_star) {
+        call star.starindex {
+            input:
+                fa = ref_fasta,
+                gtf = ref_gtf,
+                dir = out_dir,
+                thread = thread
         }
-        if (use_hisat) {
-            call hisat.hisatindex {
-                input:
-                    fa = ref_fasta,
-                    dir = out_dir,
-                    label = ref_label,
-                    thread = thread
-            }
+    }
+    if (use_hisat) {
+        call hisat.hisatindex {
+            input:
+                fa = ref_fasta,
+                dir = out_dir,
+                label = ref_label,
+                thread = thread
         }
     }
     if (use_rsem) {
